@@ -1,0 +1,44 @@
+version: "3.5"
+services:
+  event:
+    image: jasonsoft/starter:lastest
+    build: 
+      context: .
+      dockerfile: ./build/docker/starter.dockerfile
+    volumes:
+      - "./configs/app.yml:/starter/configs/app.yml"
+    networks:
+      - starter_net
+    command: /starter/starter event
+  bff:
+    image: jasonsoft/starter:lastest
+    build: 
+      context: .
+      dockerfile: ./build/docker/starter.dockerfile
+    depends_on:
+        - event
+    ports:
+      - "10080:10080"
+    volumes:
+      - "./configs/app.yml:/starter/configs/app.yml"
+    networks:
+      - starter_net
+    command: /starter/starter bff
+
+networks:
+  starter_net:
+    external:
+      name: starter_network 
+  # event-dapr:
+  #   image: "daprio/daprd:0.10.0"
+  #   command: [
+  #     "./daprd",
+  #     "-app-id", "event",
+  #     "-app-port", "10010",
+  #     "-placement-host-address", "placement:50006" # Dapr's placement service can be reach via the docker DNS entry
+  #     ]
+  #   volumes:
+  #       - "./components/:/components" # Mount our components folder for the runtime to use
+  #   depends_on:
+  #     - event
+  #   network_mode: "service:event" # Attach the event-dapr service to the event network namespace

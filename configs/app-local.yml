@@ -1,0 +1,21 @@
+env: local
+mode: debug
+databases:
+  - name: starter
+    address: localhost:3306
+    username: root
+    password: root
+    dbname: starter_db
+redis:
+  cluster_mode: false
+  addresses:
+    - "127.0.0.1:6379"
+  password:
+  max_retries: 1
+  pool_size_per_node: 2
+  db: 1
+logs:
+  - name: clog
+    type: console
+    min_level: debug
+
