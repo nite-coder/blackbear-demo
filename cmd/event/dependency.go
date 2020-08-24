@@ -11,9 +11,13 @@ import (
 	eventGRPC "github.com/jasonsoft/starter/pkg/event/delivery/grpc"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
 	eventService "github.com/jasonsoft/starter/pkg/event/service"
+	"go.opentelemetry.io/otel/api/kv"
+	"go.opentelemetry.io/otel/exporters/trace/jaeger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
 var (
@@ -59,18 +63,45 @@ func initLogger(appID string, cfg config.Configuration) {
 	}
 }
 
+// initTracer creates a new trace provider instance and registers it as global trace provider.
+func initTracer(cfg config.Configuration) func() {
+	// Create and install Jaeger export pipeline
+	flush, err := jaeger.InstallNewPipeline(
+		jaeger.WithCollectorEndpoint(cfg.Jaeger.AdvertiseAddr),
+		jaeger.WithProcess(jaeger.Process{
+			ServiceName: "event",
+			Tags: []kv.KeyValue{
+				kv.String("version", "1.0"),
+			},
+		}),
+		jaeger.WithSDK(&sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+	)
+	if err != nil {
+		log.Err(err).Fatal("install jaeger pipleline failed.")
+	}
+
+	return func() {
+		flush()
+	}
+}
+
 func grpcInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
 		logger := log.FromContext(ctx)
 		md, ok := metadata.FromIncomingContext(ctx)
 		if !ok {
-			return nil, grpc.Errorf(codes.Unauthenticated, "無Token認證信息")
+			return nil, grpc.Errorf(codes.DataLoss, "metadata is not found")
 		}
 
+		// get requestID from metadata and create a new log context
 		var requestID string
 		if val, ok := md["request_id"]; ok {
 			requestID = val[0]
 		}
+		logger = logger.Str("request_id", requestID)
+		ctx = logger.WithContext(ctx)
+
+		logger.Debugf("dump metadata %#v", md)
 
 		// var claims identity.Claims
 		// if val, ok := md["claims"]; ok {
@@ -93,7 +124,7 @@ func grpcInterceptor() grpc.UnaryServerInterceptor {
 			// centralized error
 			log.Err(err).Errorf("unary error: %v", err)
 		}
-		logger.Debugf("========== end request_id: %s", requestID)
+
 		return result, err
 
 	}

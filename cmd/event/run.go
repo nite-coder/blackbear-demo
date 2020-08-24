@@ -9,11 +9,12 @@ import (
 	"syscall"
 	"time"
 
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
 	"github.com/spf13/cobra"
+	"go.opentelemetry.io/otel/api/global"
+	"go.opentelemetry.io/otel/instrumentation/grpctrace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 )
@@ -51,6 +52,11 @@ var RunCmd = &cobra.Command{
 			return
 		}
 
+		// enable tracer
+		fn := initTracer(cfg)
+		defer fn()
+		tracer := global.Tracer("")
+
 		// start grpc servers
 		lis, err := net.Listen("tcp", cfg.Event.GRPCBind)
 		if err != nil {
@@ -70,9 +76,11 @@ var RunCmd = &cobra.Command{
 					PermitWithoutStream: true,                             // Allow pings even when there are no active streams
 				},
 			),
-			grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+			grpc.ChainUnaryInterceptor(
+				grpctrace.UnaryServerInterceptor(tracer),
 				grpcInterceptor(),
-			)),
+			),
+			grpc.StreamInterceptor(grpctrace.StreamServerInterceptor(tracer)),
 		)
 		eventProto.RegisterEventServiceServer(grpcServer, _eventServer)
 		log.Infof("event grpc service listen on %s", cfg.Event.GRPCBind)
@@ -88,7 +96,7 @@ var RunCmd = &cobra.Command{
 		log.Info("main: shutting down server...")
 
 		grpcServer.GracefulStop()
-		log.Info("main: grpc server gracefully stopped")
+		log.Info("main: event grpc server gracefully stopped")
 
 	},
 }

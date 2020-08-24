@@ -5,6 +5,7 @@ import (
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
 	"github.com/jasonsoft/starter/pkg/event"
 	"github.com/jasonsoft/starter/pkg/event/proto"
@@ -24,6 +25,9 @@ func NewEventServer(cfg config.Configuration, eventService event.EventServicer) 
 
 // GetEvents returns all events
 func (s *EventServer) GetEvents(ctx context.Context, request *empty.Empty) (*proto.GetEventsResponse, error) {
+	logger := log.FromContext(ctx)
+	logger.Debug("grpc: begin GetEvent fn")
+
 	events, err := s.eventService.Events(ctx)
 	if err != nil {
 		return nil, err

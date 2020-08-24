@@ -14,21 +14,31 @@ import (
 	"github.com/jasonsoft/starter/internal/pkg/config"
 	internalMiddleware "github.com/jasonsoft/starter/internal/pkg/middleware"
 	"github.com/jasonsoft/starter/pkg/bff/delivery/gql"
+	bffGRPC "github.com/jasonsoft/starter/pkg/bff/delivery/grpc"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+	"go.opentelemetry.io/otel/api/global"
+	"go.opentelemetry.io/otel/api/kv"
+	"go.opentelemetry.io/otel/api/trace"
+	"go.opentelemetry.io/otel/exporters/trace/jaeger"
+	"go.opentelemetry.io/otel/instrumentation/grpctrace"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 )
 
 var (
-
+	_tracer trace.Tracer
 	// grpc clients
 	_eventClient eventProto.EventServiceClient
 )
 
 func initialize(cfg config.Configuration) error {
-	initLogger("bff", cfg)
 	var err error
+
+	initLogger("bff", cfg)
+
+	_tracer = global.Tracer("")
 
 	_eventClient, err = eventGRPCClient(cfg)
 	if err != nil {
@@ -39,6 +49,28 @@ func initialize(cfg config.Configuration) error {
 	return nil
 }
 
+// initTracer creates a new trace provider instance and registers it as global trace provider.
+func initTracer(cfg config.Configuration) func() {
+	// Create and install Jaeger export pipeline
+	flush, err := jaeger.InstallNewPipeline(
+		jaeger.WithCollectorEndpoint(cfg.Jaeger.AdvertiseAddr),
+		jaeger.WithProcess(jaeger.Process{
+			ServiceName: "bff",
+			Tags: []kv.KeyValue{
+				kv.String("version", "1.0"),
+			},
+		}),
+		jaeger.WithSDK(&sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+	)
+	if err != nil {
+		log.Err(err).Fatal("install jaeger pipleline failed.")
+	}
+
+	return func() {
+		flush()
+	}
+}
+
 func eventGRPCClient(cfg config.Configuration) (eventProto.EventServiceClient, error) {
 	conn, err := grpc.Dial(cfg.Event.GRPCAdvertiseAddr,
 		grpc.WithInsecure(),
@@ -47,6 +79,11 @@ func eventGRPCClient(cfg config.Configuration) (eventProto.EventServiceClient, e
 			Timeout:             5,
 			PermitWithoutStream: true,
 		}),
+		grpc.WithChainUnaryInterceptor(
+			grpctrace.UnaryClientInterceptor(_tracer),
+			bffGRPC.ClientInterceptor(),
+		),
+		grpc.WithStreamInterceptor(grpctrace.StreamClientInterceptor(_tracer)),
 	)
 
 	if err != nil {
@@ -87,6 +124,8 @@ func verifyOrigin(origin string) bool {
 
 func newNapNap() *napnap.NapNap {
 	nap := napnap.New()
+	nap.Use(internalMiddleware.NewRequestID())
+	nap.Use(internalMiddleware.NewTracerMW())
 
 	// turn on CORS feature
 	options := middleware.Options{}
@@ -94,7 +133,6 @@ func newNapNap() *napnap.NapNap {
 	options.AllowedMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTION", "HEAD"}
 	options.AllowedHeaders = []string{"*", "Authorization", "Content-Type", "Origin", "Content-Length", "accept"}
 	nap.Use(middleware.NewCors(options))
-	nap.Use(internalMiddleware.NewRequestID())
 
 	nap.Get("/", func(c *napnap.Context) error {
 		return c.String(200, "Hello World")

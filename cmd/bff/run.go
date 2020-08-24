@@ -43,6 +43,10 @@ var RunCmd = &cobra.Command{
 			return
 		}
 
+		// enable tracer
+		fn := initTracer(cfg)
+		defer fn()
+
 		// start http server
 		nap := newNapNap()
 		httpServer := &http.Server{

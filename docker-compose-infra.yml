@@ -44,6 +44,15 @@ services:
       - "8088:8088"
     depends_on:
       - temporal
+  # Jaeger
+  jaeger-all-in-one:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+      - "14250"
+    networks:
+      - starter_net
 networks:
   starter_net:
     name: starter_network

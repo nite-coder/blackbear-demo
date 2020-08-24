@@ -53,6 +53,9 @@ type Configuration struct {
 		PoolSizePerNode int      `yaml:"pool_size_per_node"`
 		DB              int      `yaml:"db"`
 	}
+	Jaeger struct {
+		AdvertiseAddr string `yaml:"advertise_addr"`
+	}
 	BFF struct {
 		HTTPBind          string `yaml:"http_bind"`
 		HTTPAdvertiseAddr string `yaml:"http_advertise_addr"`

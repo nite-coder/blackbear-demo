@@ -19,6 +19,7 @@ const (
 )
 
 // RequestID is request_id middleware struct
+// TODO: move to napnap
 type RequestID struct {
 }
 
@@ -45,4 +46,15 @@ func (m *RequestID) Invoke(c *napnap.Context, next napnap.HandlerFunc) {
 	// Set X-Request-Id header
 	c.Writer.Header().Set(Key.String(), requestID)
 	next(c)
+}
+
+// RequestIDFromContext 從 ctx 中取得 request id, 如果沒有即時產生一個
+func RequestIDFromContext(ctx context.Context) string {
+	rid, ok := ctx.Value(Key).(string)
+	if !ok {
+		// 產生 requestID 並傳下去
+		rid = uuid.New().String()
+		return rid
+	}
+	return rid
 }
