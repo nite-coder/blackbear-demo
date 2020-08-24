@@ -6,15 +6,14 @@ import (
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/jasonsoft/log/v2"
-	internalMiddleware "github.com/jasonsoft/starter/internal/pkg/middleware"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
+	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 func (r *queryResolver) GetEvents(ctx context.Context) ([]*Event, error) {
 	logger := log.FromContext(ctx)
 	logger.Debug("begin get events fn")
-	log.Debugf("get request_id: %s", internalMiddleware.RequestIDFromContext(ctx))
 
 	resp, err := r.eventClient.GetEvents(ctx, &emptypb.Empty{})
 	if err != nil {
@@ -31,10 +30,24 @@ func (r *queryResolver) GetEvents(ctx context.Context) ([]*Event, error) {
 }
 
 func (r *queryResolver) GetWallet(ctx context.Context) (*Wallet, error) {
-	panic("not implemented")
+	logger := log.FromContext(ctx)
+	logger.Debug("begin get wallet fn")
+
+	resp, err := r.walletClient.GetWallet(ctx, &emptypb.Empty{})
+	if err != nil {
+		return nil, fmt.Errorf("walletClient call failed, name: %s: %w", "GetWallet", err)
+	}
+
+	result := grpcWalletToGQLWallet(resp.Data)
+
+	return result, nil
+
 }
 
 func grpcEventToGQLEvent(source *eventProto.Event) *Event {
+	if source == nil {
+		return nil
+	}
 
 	createdAt, _ := ptypes.Timestamp(source.CreatedAt)
 	result := Event{
@@ -52,13 +65,21 @@ func grpcEventToGQLEvent(source *eventProto.Event) *Event {
 		result.PublishedStatus = PublishedStatusPublished
 	}
 
-	// result := Event{
-	// 	ID:              1,
-	// 	Title:           "myTitle",
-	// 	Description:     "myDesc",
-	// 	PublishedStatus: PublishedStatusDraft,
-	// 	CreatedAt:       time.Now(),
-	// }
+	return &result
+}
+
+func grpcWalletToGQLWallet(source *walletProto.Wallet) *Wallet {
+	if source == nil {
+		return nil
+	}
+
+	updatedAt, _ := ptypes.Timestamp(source.UpdatedAt)
+
+	result := Wallet{
+		ID:        source.Id,
+		Amount:    source.Amount,
+		UpdatedAt: updatedAt,
+	}
 
 	return &result
 }

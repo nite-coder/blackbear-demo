@@ -1,5 +1,15 @@
 version: "3.5"
 services:
+  wallet:
+    image: jasonsoft/starter:lastest
+    build: 
+      context: .
+      dockerfile: ./build/docker/starter.dockerfile
+    volumes:
+      - "./configs/app.yml:/starter/configs/app.yml"
+    networks:
+      - starter_net
+    command: /starter/starter wallet
   event:
     image: jasonsoft/starter:lastest
     build: 

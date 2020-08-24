@@ -16,6 +16,7 @@ import (
 	"github.com/jasonsoft/starter/pkg/bff/delivery/gql"
 	bffGRPC "github.com/jasonsoft/starter/pkg/bff/delivery/grpc"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
+	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/kv"
@@ -30,7 +31,8 @@ import (
 var (
 	_tracer trace.Tracer
 	// grpc clients
-	_eventClient eventProto.EventServiceClient
+	_walletClient walletProto.WalletServiceClient
+	_eventClient  eventProto.EventServiceClient
 )
 
 func initialize(cfg config.Configuration) error {
@@ -41,6 +43,11 @@ func initialize(cfg config.Configuration) error {
 	_tracer = global.Tracer("")
 
 	_eventClient, err = eventGRPCClient(cfg)
+	if err != nil {
+		return err
+	}
+
+	_walletClient, err = walletGRPCClient(cfg)
 	if err != nil {
 		return err
 	}
@@ -97,6 +104,32 @@ func eventGRPCClient(cfg config.Configuration) (eventProto.EventServiceClient, e
 	return client, nil
 }
 
+func walletGRPCClient(cfg config.Configuration) (walletProto.WalletServiceClient, error) {
+	conn, err := grpc.Dial(cfg.Wallet.GRPCAdvertiseAddr,
+		grpc.WithInsecure(),
+		grpc.WithKeepaliveParams(keepalive.ClientParameters{
+			Time:                5,
+			Timeout:             5,
+			PermitWithoutStream: true,
+		}),
+		grpc.WithChainUnaryInterceptor(
+			grpctrace.UnaryClientInterceptor(_tracer),
+			bffGRPC.ClientInterceptor(),
+		),
+		grpc.WithStreamInterceptor(grpctrace.StreamClientInterceptor(_tracer)),
+	)
+
+	if err != nil {
+		log.Errorf("main: dial wallet grpc server failed: %v, connection string: %s", err, cfg.Wallet.GRPCAdvertiseAddr)
+		return nil, err
+	}
+
+	log.Infof("main: dail wallet grpc server %s%s", cfg.Wallet.GRPCAdvertiseAddr, " connect successfully")
+
+	client := walletProto.NewWalletServiceClient(conn)
+	return client, nil
+}
+
 func initLogger(appID string, cfg config.Configuration) {
 	// set up log target
 	log.
@@ -145,7 +178,7 @@ func newNapNap() *napnap.NapNap {
 
 	nap.Get("/playground", napnap.WrapHandler(handler.Playground("GraphQL playground", "/graphql")))
 
-	rootResolver := gql.NewResolver(_eventClient)
+	rootResolver := gql.NewResolver(_eventClient, _walletClient)
 
 	nap.Post("/graphql", napnap.WrapHandler(handler.GraphQL(
 		gql.NewExecutableSchema(gql.Config{Resolvers: rootResolver}),
@@ -161,7 +194,7 @@ func newNapNap() *napnap.NapNap {
 					},
 				}
 
-				logger.Err(e).Error("unknown error")
+				logger.Err(e).Error("GQL unknown error")
 				return err
 			}),
 		handler.RecoverFunc(func(ctx context.Context, err interface{}) error {

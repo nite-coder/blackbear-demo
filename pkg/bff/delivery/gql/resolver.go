@@ -4,15 +4,18 @@ package gql
 
 import (
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
+	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
 )
 
 type Resolver struct {
-	eventClient eventProto.EventServiceClient
+	eventClient  eventProto.EventServiceClient
+	walletClient walletProto.WalletServiceClient
 }
 
-func NewResolver(eventClient eventProto.EventServiceClient) *Resolver {
+func NewResolver(eventClient eventProto.EventServiceClient, walletClient walletProto.WalletServiceClient) *Resolver {
 	return &Resolver{
-		eventClient: eventClient,
+		eventClient:  eventClient,
+		walletClient: walletClient,
 	}
 }
 
