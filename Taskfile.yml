@@ -1,0 +1,25 @@
+# https://taskfile.dev
+
+version: '3'
+
+env:
+  COMPOSE_DOCKER_CLI_BUILD: 1
+  DOCKER_BUILDKIT: 1
+
+tasks:
+  build:
+    cmds:
+      - docker-compose build
+
+  run:
+    cmds:
+      - docker-compose up --build
+
+  infra:
+    cmds:
+      - docker-compose -f docker-compose-infra.yml up -d
+      
+  proto:
+    cmds:
+      - protoc --proto_path=. --go_out=plugins=grpc:. ./pkg/event/proto/*.proto
+      - protoc --proto_path=. --go_out=plugins=grpc:. ./pkg/wallet/proto/*.proto
