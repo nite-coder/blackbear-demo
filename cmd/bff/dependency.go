@@ -124,8 +124,9 @@ func verifyOrigin(origin string) bool {
 
 func newNapNap() *napnap.NapNap {
 	nap := napnap.New()
-	nap.Use(internalMiddleware.NewRequestID())
+	nap.Use(internalMiddleware.NewRequestIDMW())
 	nap.Use(internalMiddleware.NewTracerMW())
+	nap.Use(internalMiddleware.NewLoggerMW())
 
 	// turn on CORS feature
 	options := middleware.Options{}
