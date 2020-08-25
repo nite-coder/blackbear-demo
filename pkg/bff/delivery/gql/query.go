@@ -13,11 +13,13 @@ import (
 
 func (r *queryResolver) GetEvents(ctx context.Context) ([]*Event, error) {
 	logger := log.FromContext(ctx)
-	logger.Debug("begin get events fn")
+	logger.Debug("gql: begin get events fn")
 
 	resp, err := r.eventClient.GetEvents(ctx, &emptypb.Empty{})
 	if err != nil {
-		return nil, fmt.Errorf("eventClient call failed, name: %s: %w", "GetEvents", err)
+		err = fmt.Errorf("eventClient call failed, name: %s, %w", "GetEvents", err)
+		logger.Err(err).Warn("gql: eventClient call failed")
+		return nil, err
 	}
 
 	result := []*Event{}
@@ -31,11 +33,13 @@ func (r *queryResolver) GetEvents(ctx context.Context) ([]*Event, error) {
 
 func (r *queryResolver) GetWallet(ctx context.Context) (*Wallet, error) {
 	logger := log.FromContext(ctx)
-	logger.Debug("begin get wallet fn")
+	logger.Debug("gql: begin get wallet fn")
 
 	resp, err := r.walletClient.GetWallet(ctx, &emptypb.Empty{})
 	if err != nil {
-		return nil, fmt.Errorf("walletClient call failed, name: %s: %w", "GetWallet", err)
+		err = fmt.Errorf("walletClient call failed, name: %s, %w", "GetWallet", err)
+		logger.Err(err).Warn("gql: walletClient call failed")
+		return nil, err
 	}
 
 	result := grpcWalletToGQLWallet(resp.Data)

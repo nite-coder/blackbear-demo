@@ -1,5 +1,18 @@
 version: "3.5"
 services:
+  # worker
+  worker:
+    image: jasonsoft/starter:lastest
+    build: 
+      context: .
+      dockerfile: ./build/docker/starter.dockerfile
+    volumes:
+      - "./configs/app.yml:/starter/configs/app.yml"
+    networks:
+      - starter_net
+    command: /starter/starter worker
+
+  # wallet
   wallet:
     image: jasonsoft/starter:lastest
     build: 
@@ -10,6 +23,8 @@ services:
     networks:
       - starter_net
     command: /starter/starter wallet
+
+  # event
   event:
     image: jasonsoft/starter:lastest
     build: 
@@ -20,6 +35,8 @@ services:
     networks:
       - starter_net
     command: /starter/starter event
+
+  # bff
   bff:
     image: jasonsoft/starter:lastest
     build: 
@@ -39,6 +56,8 @@ networks:
   starter_net:
     external:
       name: starter_network 
+
+      
   # event-dapr:
   #   image: "daprio/daprd:0.10.0"
   #   command: [

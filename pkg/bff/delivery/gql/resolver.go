@@ -5,17 +5,20 @@ package gql
 import (
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
 	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
+	temporalClient "go.temporal.io/sdk/client"
 )
 
 type Resolver struct {
-	eventClient  eventProto.EventServiceClient
-	walletClient walletProto.WalletServiceClient
+	eventClient    eventProto.EventServiceClient
+	walletClient   walletProto.WalletServiceClient
+	temporalClient temporalClient.Client
 }
 
-func NewResolver(eventClient eventProto.EventServiceClient, walletClient walletProto.WalletServiceClient) *Resolver {
+func NewResolver(eventClient eventProto.EventServiceClient, walletClient walletProto.WalletServiceClient, temporalClient temporalClient.Client) *Resolver {
 	return &Resolver{
-		eventClient:  eventClient,
-		walletClient: walletClient,
+		eventClient:    eventClient,
+		walletClient:   walletClient,
+		temporalClient: temporalClient,
 	}
 }
 

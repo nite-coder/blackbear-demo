@@ -1,38 +1,28 @@
-package bff
+package worker
 
 import (
-	"context"
-	"fmt"
-	"net/http"
-
-	"github.com/99designs/gqlgen/handler"
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/log/v2/handlers/console"
 	"github.com/jasonsoft/log/v2/handlers/gelf"
-	"github.com/jasonsoft/napnap"
-	"github.com/jasonsoft/napnap/middleware"
 	"github.com/jasonsoft/starter/internal/pkg/config"
-	internalMiddleware "github.com/jasonsoft/starter/internal/pkg/middleware"
-	"github.com/jasonsoft/starter/pkg/bff/delivery/gql"
 	bffGRPC "github.com/jasonsoft/starter/pkg/bff/delivery/grpc"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
 	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
-	"github.com/vektah/gqlparser/v2/gqlerror"
+	"github.com/jasonsoft/starter/pkg/workflow"
+
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/kv"
 	"go.opentelemetry.io/otel/api/trace"
 	"go.opentelemetry.io/otel/exporters/trace/jaeger"
 	"go.opentelemetry.io/otel/instrumentation/grpctrace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"go.temporal.io/sdk/client"
-	temporalClient "go.temporal.io/sdk/client"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 )
 
 var (
-	_tracer         trace.Tracer
-	_temporalClient temporalClient.Client
+	_tracer trace.Tracer
+
 	// grpc clients
 	_walletClient walletProto.WalletServiceClient
 	_eventClient  eventProto.EventServiceClient
@@ -41,7 +31,7 @@ var (
 func initialize(cfg config.Configuration) error {
 	var err error
 
-	initLogger("bff", cfg)
+	initLogger("worker", cfg)
 
 	_tracer = global.Tracer("")
 
@@ -55,12 +45,15 @@ func initialize(cfg config.Configuration) error {
 		return err
 	}
 
-	_temporalClient, err = initTemporalClient(cfg)
-	if err != nil {
-		return err
+	manager := workflow.Manager{
+		Config:       cfg,
+		WalletClient: _walletClient,
+		EventClient:  _eventClient,
 	}
 
-	log.Info("bff server is initialized")
+	workflow.SetManager(&manager)
+
+	log.Info("worker server is initialized")
 	return nil
 }
 
@@ -70,7 +63,7 @@ func initTracer(cfg config.Configuration) func() {
 	flush, err := jaeger.InstallNewPipeline(
 		jaeger.WithCollectorEndpoint(cfg.Jaeger.AdvertiseAddr),
 		jaeger.WithProcess(jaeger.Process{
-			ServiceName: "bff",
+			ServiceName: "worker",
 			Tags: []kv.KeyValue{
 				kv.String("version", "1.0"),
 			},
@@ -84,17 +77,6 @@ func initTracer(cfg config.Configuration) func() {
 	return func() {
 		flush()
 	}
-}
-
-func initTemporalClient(cfg config.Configuration) (temporalClient.Client, error) {
-	// The client is a heavyweight object that should be created once per process.
-	c, err := temporalClient.NewClient(client.Options{
-		HostPort: cfg.Temporal.Address,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return c, nil
 }
 
 func eventGRPCClient(cfg config.Configuration) (eventProto.EventServiceClient, error) {
@@ -168,62 +150,4 @@ func initLogger(appID string, cfg config.Configuration) {
 			log.AddHandler(graylog, levels...)
 		}
 	}
-}
-
-func verifyOrigin(origin string) bool {
-	return true
-}
-
-func newNapNap() *napnap.NapNap {
-	nap := napnap.New()
-	nap.Use(internalMiddleware.NewRequestIDMW())
-	nap.Use(internalMiddleware.NewTracerMW())
-	nap.Use(internalMiddleware.NewLoggerMW())
-
-	// turn on CORS feature
-	options := middleware.Options{}
-	options.AllowOriginFunc = verifyOrigin
-	options.AllowedMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTION", "HEAD"}
-	options.AllowedHeaders = []string{"*", "Authorization", "Content-Type", "Origin", "Content-Length", "accept"}
-	nap.Use(middleware.NewCors(options))
-
-	nap.Get("/", func(c *napnap.Context) error {
-		return c.String(200, "Hello World")
-	})
-
-	nap.Get("/ping", func(c *napnap.Context) error {
-		return c.String(http.StatusOK, "pong!!!")
-	})
-
-	nap.Get("/playground", napnap.WrapHandler(handler.Playground("GraphQL playground", "/graphql")))
-
-	rootResolver := gql.NewResolver(_eventClient, _walletClient, _temporalClient)
-
-	nap.Post("/graphql", napnap.WrapHandler(handler.GraphQL(
-		gql.NewExecutableSchema(gql.Config{Resolvers: rootResolver}),
-		handler.ErrorPresenter(
-			func(ctx context.Context, e error) *gqlerror.Error {
-				logger := log.FromContext(ctx)
-
-				// TODO: handle all graphql errors here
-				err := &gqlerror.Error{
-					Message: e.Error(),
-					Extensions: map[string]interface{}{
-						"code": "401001",
-					},
-				}
-
-				logger.Err(e).Error("gql: unknown error")
-				return err
-			}),
-		handler.RecoverFunc(func(ctx context.Context, err interface{}) error {
-			logger := log.FromContext(ctx)
-			myErr := fmt.Errorf("Internal server error! %w", err)
-
-			logger.Err(myErr).Error("Internal server error!")
-			return myErr
-		}),
-	)))
-
-	return nap
 }

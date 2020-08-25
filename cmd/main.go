@@ -7,6 +7,7 @@ import (
 	"github.com/jasonsoft/starter/cmd/bff"
 	"github.com/jasonsoft/starter/cmd/event"
 	"github.com/jasonsoft/starter/cmd/wallet"
+	"github.com/jasonsoft/starter/cmd/worker"
 	"github.com/spf13/cobra"
 )
 
@@ -17,6 +18,7 @@ var rootCmd = &cobra.Command{
 }
 
 func main() {
+	rootCmd.AddCommand(worker.RunCmd)
 	rootCmd.AddCommand(wallet.RunCmd)
 	rootCmd.AddCommand(event.RunCmd)
 	rootCmd.AddCommand(bff.RunCmd)

@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
 	"github.com/jasonsoft/starter/pkg/event"
 )
@@ -37,12 +38,16 @@ func (srv *EventService) Events(ctx context.Context) ([]*event.Event, error) {
 
 // UpdatePublishStatus update
 func (srv *EventService) UpdatePublishStatus(ctx context.Context, request event.UpdateEventStatusRequest) error {
+	logger := log.FromContext(ctx)
+	logger.Debug("begin UpdatePublishStatus fn")
+
 	srv.mu.Lock()
 	defer srv.mu.Unlock()
 
 	for _, evt := range srv.events {
 		if evt.ID == request.EventID {
 			evt.PublishedStatus = request.PublishedStatus
+			evt.CreatedAt = time.Now().UTC()
 		}
 	}
 

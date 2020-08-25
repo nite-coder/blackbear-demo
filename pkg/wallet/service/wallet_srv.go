@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
 	"github.com/jasonsoft/starter/pkg/wallet"
 )
@@ -27,10 +28,16 @@ func NewWalletService(cfg config.Configuration) wallet.WalletServicer {
 }
 
 func (svc *WalletService) Wallet(ctx context.Context) (*wallet.Wallet, error) {
+	logger := log.FromContext(ctx)
+	logger.Debug("begin wallet fn")
+
 	return svc.wallet, nil
 }
 
 func (svc *WalletService) Withdraw(ctx context.Context, transID string, amount int64) error {
+	logger := log.FromContext(ctx)
+	logger.Debug("begin withdraw fn")
+
 	svc.mu.Lock()
 	defer svc.mu.Unlock()
 

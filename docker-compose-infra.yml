@@ -9,7 +9,7 @@ services:
     networks:
       - starter_net
   temporal:
-    image: temporalio/auto-setup:0.28.0
+    image: temporalio/auto-setup:0.29.0
     ports:
      - "7233:7233"
     environment:
@@ -24,7 +24,7 @@ services:
     depends_on:
       - mysql
   temporal-admin-tools:
-    image: temporalio/admin-tools:0.28.0
+    image: temporalio/admin-tools:0.29.0
     stdin_open: true
     tty: true
     environment:
@@ -34,7 +34,7 @@ services:
     depends_on:
       - temporal
   temporal-web:
-    image: temporalio/web:0.28.1
+    image: temporalio/web:0.29.0
     environment:
       - "TEMPORAL_GRPC_ENDPOINT=temporal:7233"
       - "TEMPORAL_PERMIT_WRITE_API=true"
@@ -46,7 +46,7 @@ services:
       - temporal
   # Jaeger
   jaeger-all-in-one:
-    image: jaegertracing/all-in-one:latest
+    image: jaegertracing/all-in-one:1.18.1
     ports:
       - "16686:16686"
       - "14268:14268"

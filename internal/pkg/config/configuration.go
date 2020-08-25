@@ -32,20 +32,16 @@ type Database struct {
 	DBName   string
 }
 
-// Prometheus 用來設定 prometheus
-type Prometheus struct {
-	SubSystemName string `yaml:"sub_system_name"`
-	Bind          string `yaml:"bind"`
-	MetricsPath   string `yaml:"metrics_path"`
-}
-
 // Configuration 用來代表 config 設定物件
 type Configuration struct {
 	Env       string
 	Mode      string
 	Logs      []LogSetting
 	Databases []Database
-	Redis     struct {
+	Temporal  struct {
+		Address string
+	}
+	Redis struct {
 		ClusterMode     bool     `yaml:"cluster_mode"`
 		Addresses       []string `yaml:"addresses"`
 		Password        string   `yaml:"password"`

@@ -5,6 +5,7 @@ import (
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
 	"github.com/jasonsoft/starter/pkg/wallet"
 	"github.com/jasonsoft/starter/pkg/wallet/proto"
@@ -25,6 +26,9 @@ func NewWalletServer(cfg config.Configuration, walletService wallet.WalletServic
 
 // GetWallet returns single wallet instance
 func (s *WalletServer) GetWallet(ctx context.Context, in *empty.Empty) (*proto.GetWalletResponse, error) {
+	logger := log.FromContext(ctx)
+	logger.Debug("grpc: begin GetWallet fn")
+
 	wallet, err := s.walletService.Wallet(ctx)
 	if err != nil {
 		return nil, err
@@ -38,7 +42,14 @@ func (s *WalletServer) GetWallet(ctx context.Context, in *empty.Empty) (*proto.G
 
 // Withdraw fn will withdraw money from wallet
 func (s *WalletServer) Withdraw(ctx context.Context, in *proto.WithdrawRequest) (*empty.Empty, error) {
-	return nil, nil
+	logger := log.FromContext(ctx)
+	logger.Debug("grpc: begin Withdraw fn")
+
+	err := s.walletService.Withdraw(ctx, in.TransId, in.Amount)
+	if err != nil {
+		return nil, err
+	}
+	return &empty.Empty{}, nil
 }
 
 func walletToGWallet(wallet *wallet.Wallet) *proto.Wallet {

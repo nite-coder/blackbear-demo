@@ -1,14 +1,6 @@
 # Starter
 
-run docker infra: `docker-compose -f docker-compose-infra.yml up`
-
-
-
-
-
-
-
-list events
+test
 
 ```gql
 query listEvent{
@@ -20,5 +12,21 @@ query listEvent{
     createdAt
   }
 }
+
+query getWallet{
+  getWallet{
+    id
+    amount
+		updatedAt
+  }
+}
+
+mutation publishEvent {
+  publishEvent(input:{eventID: 1})
+}
 ```
+
+
+
+
 

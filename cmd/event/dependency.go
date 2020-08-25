@@ -101,7 +101,7 @@ func grpcInterceptor() grpc.UnaryServerInterceptor {
 		logger = logger.Str("request_id", requestID)
 		ctx = logger.WithContext(ctx)
 
-		logger.Debugf("dump metadata %#v", md)
+		//logger.Debugf("dump metadata %#v", md)
 
 		// var claims identity.Claims
 		// if val, ok := md["claims"]; ok {
@@ -122,7 +122,7 @@ func grpcInterceptor() grpc.UnaryServerInterceptor {
 		result, err := handler(ctx, req)
 		if err != nil {
 			// centralized error
-			log.Err(err).Errorf("unary error: %v", err)
+			logger.Err(err).Errorf("event grpc unknown error: %v", err)
 		}
 
 		return result, err

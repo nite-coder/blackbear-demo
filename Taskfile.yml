@@ -18,6 +18,10 @@ tasks:
   infra:
     cmds:
       - docker-compose -f docker-compose-infra.yml up -d
+
+  infra-down:
+    cmds:
+      - docker-compose -f docker-compose-infra.yml down
       
   proto:
     cmds:
