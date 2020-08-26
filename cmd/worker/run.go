@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
+	"go.temporal.io/sdk/workflow"
 )
 
 // RunCmd 是 worker service 的進入口
@@ -44,6 +45,9 @@ var RunCmd = &cobra.Command{
 		// start worker, one worker per process mode
 		c, err := client.NewClient(client.Options{
 			HostPort: cfg.Temporal.Address,
+			ContextPropagators: []workflow.ContextPropagator{
+				starterWorkflow.NewContextPropagator(),
+			},
 		})
 		if err != nil {
 			log.Fatalf("Unable to create client", err)

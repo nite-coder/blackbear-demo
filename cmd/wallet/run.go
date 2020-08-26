@@ -12,8 +12,8 @@ import (
 	"github.com/jasonsoft/starter/internal/pkg/config"
 	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
 	"github.com/spf13/cobra"
+	grpctrace "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc"
 	"go.opentelemetry.io/otel/api/global"
-	"go.opentelemetry.io/otel/instrumentation/grpctrace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 )

@@ -55,3 +55,9 @@ func RequestIDFromContext(ctx context.Context) string {
 	}
 	return rid
 }
+
+func SetRequestIDToContext(ctx context.Context, requestID string) context.Context {
+	// save request id to request context
+	ctx = context.WithValue(ctx, key, requestID)
+	return ctx
+}

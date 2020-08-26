@@ -17,15 +17,17 @@ import (
 	bffGRPC "github.com/jasonsoft/starter/pkg/bff/delivery/grpc"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
 	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
+	starterWorkflow "github.com/jasonsoft/starter/pkg/workflow"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+	grpctrace "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc"
 	"go.opentelemetry.io/otel/api/global"
-	"go.opentelemetry.io/otel/api/kv"
 	"go.opentelemetry.io/otel/api/trace"
 	"go.opentelemetry.io/otel/exporters/trace/jaeger"
-	"go.opentelemetry.io/otel/instrumentation/grpctrace"
+	"go.opentelemetry.io/otel/label"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.temporal.io/sdk/client"
 	temporalClient "go.temporal.io/sdk/client"
+	"go.temporal.io/sdk/workflow"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 )
@@ -71,8 +73,8 @@ func initTracer(cfg config.Configuration) func() {
 		jaeger.WithCollectorEndpoint(cfg.Jaeger.AdvertiseAddr),
 		jaeger.WithProcess(jaeger.Process{
 			ServiceName: "bff",
-			Tags: []kv.KeyValue{
-				kv.String("version", "1.0"),
+			Tags: []label.KeyValue{
+				label.String("version", "1.0"),
 			},
 		}),
 		jaeger.WithSDK(&sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
@@ -90,6 +92,9 @@ func initTemporalClient(cfg config.Configuration) (temporalClient.Client, error)
 	// The client is a heavyweight object that should be created once per process.
 	c, err := temporalClient.NewClient(client.Options{
 		HostPort: cfg.Temporal.Address,
+		ContextPropagators: []workflow.ContextPropagator{
+			starterWorkflow.NewContextPropagator(),
+		},
 	})
 	if err != nil {
 		return nil, err

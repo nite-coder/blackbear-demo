@@ -11,7 +11,7 @@ import (
 	eventGRPC "github.com/jasonsoft/starter/pkg/event/delivery/grpc"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
 	eventService "github.com/jasonsoft/starter/pkg/event/service"
-	"go.opentelemetry.io/otel/api/kv"
+	"go.opentelemetry.io/otel/label"
 	"go.opentelemetry.io/otel/exporters/trace/jaeger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -70,8 +70,8 @@ func initTracer(cfg config.Configuration) func() {
 		jaeger.WithCollectorEndpoint(cfg.Jaeger.AdvertiseAddr),
 		jaeger.WithProcess(jaeger.Process{
 			ServiceName: "event",
-			Tags: []kv.KeyValue{
-				kv.String("version", "1.0"),
+			Tags: []label.KeyValue{
+				label.String("version", "1.0"),
 			},
 		}),
 		jaeger.WithSDK(&sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),

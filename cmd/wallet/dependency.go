@@ -11,7 +11,7 @@ import (
 	walletGRPC "github.com/jasonsoft/starter/pkg/wallet/delivery/grpc"
 	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
 	walletService "github.com/jasonsoft/starter/pkg/wallet/service"
-	"go.opentelemetry.io/otel/api/kv"
+	"go.opentelemetry.io/otel/label"
 	"go.opentelemetry.io/otel/exporters/trace/jaeger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -70,8 +70,8 @@ func initTracer(cfg config.Configuration) func() {
 		jaeger.WithCollectorEndpoint(cfg.Jaeger.AdvertiseAddr),
 		jaeger.WithProcess(jaeger.Process{
 			ServiceName: "wallet",
-			Tags: []kv.KeyValue{
-				kv.String("version", "1.0"),
+			Tags: []label.KeyValue{
+				label.String("version", "1.0"),
 			},
 		}),
 		jaeger.WithSDK(&sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),

@@ -11,10 +11,10 @@ import (
 	"github.com/jasonsoft/starter/pkg/workflow"
 
 	"go.opentelemetry.io/otel/api/global"
-	"go.opentelemetry.io/otel/api/kv"
 	"go.opentelemetry.io/otel/api/trace"
 	"go.opentelemetry.io/otel/exporters/trace/jaeger"
-	"go.opentelemetry.io/otel/instrumentation/grpctrace"
+	grpctrace "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc"
+	"go.opentelemetry.io/otel/label"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
@@ -64,8 +64,8 @@ func initTracer(cfg config.Configuration) func() {
 		jaeger.WithCollectorEndpoint(cfg.Jaeger.AdvertiseAddr),
 		jaeger.WithProcess(jaeger.Process{
 			ServiceName: "worker",
-			Tags: []kv.KeyValue{
-				kv.String("version", "1.0"),
+			Tags: []label.KeyValue{
+				label.String("version", "1.0"),
 			},
 		}),
 		jaeger.WithSDK(&sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),

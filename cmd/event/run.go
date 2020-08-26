@@ -13,7 +13,7 @@ import (
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
 	"github.com/spf13/cobra"
 	"go.opentelemetry.io/otel/api/global"
-	"go.opentelemetry.io/otel/instrumentation/grpctrace"
+	grpctrace "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 )

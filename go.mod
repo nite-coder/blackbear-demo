@@ -8,12 +8,14 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/jasonsoft/log/v2 v2.0.0-beta.4
 	github.com/jasonsoft/napnap v1.1.0
+	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/spf13/cobra v1.0.0
 	github.com/stretchr/testify v1.6.1
 	github.com/vektah/gqlparser/v2 v2.0.1
-	go.opentelemetry.io/otel v0.10.0
-	go.opentelemetry.io/otel/exporters/trace/jaeger v0.10.0
-	go.opentelemetry.io/otel/sdk v0.10.0
+	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc v0.11.0
+	go.opentelemetry.io/otel v0.11.0
+	go.opentelemetry.io/otel/exporters/trace/jaeger v0.11.0
+	go.opentelemetry.io/otel/sdk v0.11.0
 	go.temporal.io/sdk v0.29.0
 	golang.org/x/net v0.0.0-20200813134508-3edf25e44fcc
 	google.golang.org/grpc v1.31.0

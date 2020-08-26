@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/jasonsoft/log/v2"
+	internalMiddleware "github.com/jasonsoft/starter/internal/pkg/middleware"
+	starterWorkflow "github.com/jasonsoft/starter/pkg/workflow"
 	"go.temporal.io/sdk/client"
 )
 
@@ -16,7 +18,9 @@ func (r *mutationResolver) PublishEvent(ctx context.Context, input []*PublishEve
 		TaskQueue: "default",
 	}
 
-	we, err := r.temporalClient.ExecuteWorkflow(context.Background(), workflowOptions, "PublishEventWorkflow")
+	ctx = context.WithValue(ctx, starterWorkflow.PropagateKey, &starterWorkflow.Values{Key: "request_id", Value: internalMiddleware.RequestIDFromContext(ctx)})
+
+	we, err := r.temporalClient.ExecuteWorkflow(ctx, workflowOptions, "PublishEventWorkflow")
 	if err != nil {
 		return nil, err
 	}
