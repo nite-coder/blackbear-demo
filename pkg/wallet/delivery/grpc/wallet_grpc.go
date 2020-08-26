@@ -3,7 +3,6 @@ package grpc
 import (
 	"context"
 
-	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
@@ -36,8 +35,13 @@ func (s *WalletServer) GetWallet(ctx context.Context, in *empty.Empty) (*proto.G
 		return nil, err
 	}
 
+	data, err := walletToGRPC(wallet)
+	if err != nil {
+		return nil, err
+	}
+
 	result := proto.GetWalletResponse{
-		Data: walletToGWallet(wallet),
+		Data: data,
 	}
 	return &result, nil
 }
@@ -52,16 +56,4 @@ func (s *WalletServer) Withdraw(ctx context.Context, in *proto.WithdrawRequest) 
 		return nil, err
 	}
 	return &empty.Empty{}, nil
-}
-
-func walletToGWallet(wallet *wallet.Wallet) *proto.Wallet {
-	updatedAt, _ := ptypes.TimestampProto(wallet.UpdatedAt)
-
-	result := proto.Wallet{
-		Id:        wallet.ID,
-		Amount:    wallet.Amount,
-		UpdatedAt: updatedAt,
-	}
-
-	return &result
 }

@@ -3,7 +3,6 @@ package grpc
 import (
 	"context"
 
-	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
@@ -16,6 +15,7 @@ type EventServer struct {
 	eventService event.EventServicer
 }
 
+// NewEventServer create a EventServer instance
 func NewEventServer(cfg config.Configuration, eventService event.EventServicer) proto.EventServiceServer {
 	return &EventServer{
 		config:       cfg,
@@ -33,8 +33,12 @@ func (s *EventServer) GetEvents(ctx context.Context, request *empty.Empty) (*pro
 		return nil, err
 	}
 
+	data, err := eventsToGRPC(events)
+	if err != nil {
+		return nil, nil
+	}
 	result := proto.GetEventsResponse{
-		Data: convertToGRPCEvents(events),
+		Data: data,
 	}
 
 	return &result, nil
@@ -51,24 +55,4 @@ func (s *EventServer) UpdatePublishStatus(ctx context.Context, request *proto.Up
 
 	err := s.eventService.UpdatePublishStatus(ctx, req)
 	return &empty.Empty{}, err
-}
-
-func convertToGRPCEvents(events []*event.Event) []*proto.Event {
-	result := []*proto.Event{}
-
-	for _, evt := range events {
-		createdAt, _ := ptypes.TimestampProto(evt.CreatedAt)
-
-		target := proto.Event{
-			Id:              evt.ID,
-			Title:           evt.Title,
-			Description:     evt.Description,
-			PublishedStatus: proto.PublishedStatus(evt.PublishedStatus),
-			CreatedAt:       createdAt,
-		}
-
-		result = append(result, &target)
-	}
-
-	return result
 }
