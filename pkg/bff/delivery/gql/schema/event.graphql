@@ -1,0 +1,16 @@
+input publishEventInput {
+    eventID: Int!
+}
+
+enum PublishedStatus {
+  DRAFT
+  PUBLISHED
+}
+
+type Event {
+    id: Int!
+    title: String!
+    description: String!
+    publishedStatus: PublishedStatus!
+    createdAt: Time!
+}

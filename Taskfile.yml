@@ -27,3 +27,8 @@ tasks:
     cmds:
       - protoc --proto_path=. --go_out=plugins=grpc:. ./pkg/event/proto/*.proto
       - protoc --proto_path=. --go_out=plugins=grpc:. ./pkg/wallet/proto/*.proto
+
+  gql:
+    dir: pkg/bff/delivery/gql/
+    cmds:
+      - go run github.com/99designs/gqlgen --verbose

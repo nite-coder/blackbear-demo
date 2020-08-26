@@ -236,6 +236,22 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
+	{Name: "schema/event.graphql", Input: `input publishEventInput {
+    eventID: Int!
+}
+
+enum PublishedStatus {
+  DRAFT
+  PUBLISHED
+}
+
+type Event {
+    id: Int!
+    title: String!
+    description: String!
+    publishedStatus: PublishedStatus!
+    createdAt: Time!
+}`, BuiltIn: false},
 	{Name: "schema/schema.graphql", Input: `scalar Time
 
 schema {
@@ -253,29 +269,15 @@ type Mutation {
  	publishEvent(input: [publishEventInput!]!): Boolean
 }
 
-input publishEventInput {
-    eventID: Int!
-}
 
-enum PublishedStatus {
-  DRAFT
-  PUBLISHED
-}
 
-type Event {
-    id: Int!
-    title: String!
-    description: String!
-    publishedStatus: PublishedStatus!
-    createdAt: Time!
-}
-
+`, BuiltIn: false},
+	{Name: "schema/wallet.graphql", Input: `
 type Wallet {
   id: Int!
   amount: Int!
   updatedAt: Time!
-}
-`, BuiltIn: false},
+}`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
