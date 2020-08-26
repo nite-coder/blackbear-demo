@@ -56,6 +56,7 @@ func RequestIDFromContext(ctx context.Context) string {
 	return rid
 }
 
+// SetRequestIDToContext save the requestID into context
 func SetRequestIDToContext(ctx context.Context, requestID string) context.Context {
 	// save request id to request context
 	ctx = context.WithValue(ctx, key, requestID)

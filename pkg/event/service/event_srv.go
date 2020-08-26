@@ -10,13 +10,15 @@ import (
 	"github.com/jasonsoft/starter/pkg/event"
 )
 
+// EventService handles event's business logic
 type EventService struct {
 	mu     sync.RWMutex
 	config config.Configuration
 	events []*event.Event
 }
 
-func NewEventService(cfg config.Configuration) event.EventServicer {
+// NewEventService create an instance of event service
+func NewEventService(cfg config.Configuration) event.Servicer {
 	return &EventService{
 		config: cfg,
 		events: []*event.Event{

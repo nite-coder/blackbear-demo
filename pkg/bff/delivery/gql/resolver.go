@@ -8,12 +8,14 @@ import (
 	temporalClient "go.temporal.io/sdk/client"
 )
 
+// Resolver will be used to handles all business logic
 type Resolver struct {
 	eventClient    eventProto.EventServiceClient
 	walletClient   walletProto.WalletServiceClient
 	temporalClient temporalClient.Client
 }
 
+// NewResolver create an instance of Resolver
 func NewResolver(eventClient eventProto.EventServiceClient, walletClient walletProto.WalletServiceClient, temporalClient temporalClient.Client) *Resolver {
 	return &Resolver{
 		eventClient:    eventClient,

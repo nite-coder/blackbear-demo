@@ -10,13 +10,15 @@ import (
 	"github.com/jasonsoft/starter/pkg/wallet"
 )
 
+// WalletService handles wallet's business logic
 type WalletService struct {
 	mu     sync.Mutex
 	config config.Configuration
 	wallet *wallet.Wallet
 }
 
-func NewWalletService(cfg config.Configuration) wallet.WalletServicer {
+// NewWalletService create an instance of wallet service
+func NewWalletService(cfg config.Configuration) wallet.Servicer {
 	return &WalletService{
 		config: cfg,
 		wallet: &wallet.Wallet{
@@ -27,6 +29,7 @@ func NewWalletService(cfg config.Configuration) wallet.WalletServicer {
 	}
 }
 
+// Wallet returns a wallet
 func (svc *WalletService) Wallet(ctx context.Context) (*wallet.Wallet, error) {
 	logger := log.FromContext(ctx)
 	logger.Debug("begin wallet fn")
@@ -34,6 +37,7 @@ func (svc *WalletService) Wallet(ctx context.Context) (*wallet.Wallet, error) {
 	return svc.wallet, nil
 }
 
+// Withdraw fn remove amount from wallet
 func (svc *WalletService) Withdraw(ctx context.Context, transID string, amount int64) error {
 	logger := log.FromContext(ctx)
 	logger.Debug("begin withdraw fn")

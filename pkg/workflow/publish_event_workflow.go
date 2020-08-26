@@ -12,6 +12,7 @@ import (
 	"go.temporal.io/sdk/workflow"
 )
 
+// PublishEventWorkflow ...
 func PublishEventWorkflow(ctx workflow.Context) error {
 	ao := workflow.ActivityOptions{
 		ScheduleToStartTimeout: time.Minute,
@@ -46,6 +47,7 @@ func PublishEventWorkflow(ctx workflow.Context) error {
 	return nil
 }
 
+// WithdrawActivity ...
 func WithdrawActivity(ctx context.Context) error {
 	logger := getLogger(ctx)
 	logger.Debug("workflow: begin WithdrawActivity fn")
@@ -62,6 +64,7 @@ func WithdrawActivity(ctx context.Context) error {
 	return nil
 }
 
+// PublishEventActivity ...
 func PublishEventActivity(ctx context.Context) error {
 	logger := getLogger(ctx)
 	logger.Debug("workflow: begin PublishEventActivity fn")

@@ -10,13 +10,14 @@ import (
 	"github.com/jasonsoft/starter/pkg/event/proto"
 )
 
+// EventServer handles all event business logic
 type EventServer struct {
 	config       config.Configuration
-	eventService event.EventServicer
+	eventService event.Servicer
 }
 
-// NewEventServer create a EventServer instance
-func NewEventServer(cfg config.Configuration, eventService event.EventServicer) proto.EventServiceServer {
+// NewEventServer create an instance of EventServer
+func NewEventServer(cfg config.Configuration, eventService event.Servicer) proto.EventServiceServer {
 	return &EventServer{
 		config:       cfg,
 		eventService: eventService,

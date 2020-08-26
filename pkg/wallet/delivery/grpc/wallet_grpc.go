@@ -10,13 +10,14 @@ import (
 	"github.com/jasonsoft/starter/pkg/wallet/proto"
 )
 
+// WalletServer is grpc server for wallet
 type WalletServer struct {
 	config        config.Configuration
-	walletService wallet.WalletServicer
+	walletService wallet.Servicer
 }
 
 // NewWalletServer return a WalletServer instance
-func NewWalletServer(cfg config.Configuration, walletService wallet.WalletServicer) *WalletServer {
+func NewWalletServer(cfg config.Configuration, walletService wallet.Servicer) *WalletServer {
 	return &WalletServer{
 		config:        cfg,
 		walletService: walletService,

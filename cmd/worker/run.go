@@ -55,7 +55,7 @@ var RunCmd = &cobra.Command{
 			Tracer: bridgeTracer,
 		})
 		if err != nil {
-			log.Fatalf("Unable to create client", err)
+			log.Err(err).Fatal("Unable to create client")
 		}
 		defer c.Close()
 
@@ -69,7 +69,7 @@ var RunCmd = &cobra.Command{
 
 		err = w.Run(worker.InterruptCh())
 		if err != nil {
-			log.Fatalf("Unable to start worker", err)
+			log.Err(err).Fatalf("Unable to start worker")
 		}
 
 		log.Info("worker has stopped")

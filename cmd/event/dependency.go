@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	_eventService event.EventServicer
+	_eventService event.Servicer
 
 	// grpc server
 	_eventServer eventProto.EventServiceServer

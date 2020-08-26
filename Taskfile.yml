@@ -7,13 +7,22 @@ env:
   DOCKER_BUILDKIT: 1
 
 tasks:
+  lint:
+    cmds:
+      - docker run --rm -v  ${PWD}:/data cytopia/golint:latest ./...
+
   build:
     cmds:
       - docker-compose build
 
+  test:
+    cmds: 
+      - go test -v ./...
+
   run:
     cmds:
       - docker-compose up --build
+
 
   infra:
     cmds:

@@ -12,10 +12,12 @@ import (
 
 var _manager *Manager
 
+// SetManager allow extenal to pass Manager instance to workflow.  The manager instance will be used in the package.
 func SetManager(m *Manager) {
 	_manager = m
 }
 
+// Manager is a group of grpc clients.
 type Manager struct {
 	Config       config.Configuration
 	WalletClient walletProto.WalletServiceClient

@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	_walletService wallet.WalletServicer
+	_walletService wallet.Servicer
 
 	// grpc server
 	_walletServer walletProto.WalletServiceServer
