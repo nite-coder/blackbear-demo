@@ -2,10 +2,6 @@ package worker
 
 import (
 	"fmt"
-	"os"
-	"os/signal"
-	"runtime"
-	"syscall"
 
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
@@ -29,9 +25,7 @@ var RunCmd = &cobra.Command{
 				if !ok {
 					err = fmt.Errorf("unknown error: %v", r)
 				}
-				trace := make([]byte, 4096)
-				runtime.Stack(trace, true)
-				log.Str("stack_trace", string(trace)).Err(err).Panic("unknown error")
+				log.Err(err).Panic("unknown error")
 			}
 		}()
 
@@ -47,36 +41,28 @@ var RunCmd = &cobra.Command{
 		fn := initTracer(cfg)
 		defer fn()
 
-		// start worker
+		// start worker, one worker per process mode
 		c, err := client.NewClient(client.Options{
-			HostPort: "temporal:7233",
+			HostPort: cfg.Temporal.Address,
 		})
 		if err != nil {
 			log.Fatalf("Unable to create client", err)
 		}
 		defer c.Close()
 
-		w := worker.New(c, "default", worker.Options{})
+		w := worker.New(c, "default", worker.Options{
+			WorkerStopTimeout: 10, // 10 sec
+		})
 
 		w.RegisterWorkflow(starterWorkflow.PublishEventWorkflow)
 		w.RegisterActivity(starterWorkflow.WithdrawActivity)
 		w.RegisterActivity(starterWorkflow.PublishEventActivity)
 
-		go func() {
-			log.Info("worker started")
-			err = w.Run(nil)
-			if err != nil {
-				log.Fatalf("Unable to start worker", err)
-			}
-		}()
+		err = w.Run(worker.InterruptCh())
+		if err != nil {
+			log.Fatalf("Unable to start worker", err)
+		}
 
-		stopChan := make(chan os.Signal, 1)
-		signal.Notify(stopChan, syscall.SIGINT, syscall.SIGKILL, syscall.SIGHUP, syscall.SIGTERM)
-		<-stopChan
-		log.Info("main: shutting down worker...")
-
-		w.Stop()
-		log.Info("main: worker was stopped")
-
+		log.Info("worker has stopped")
 	},
 }

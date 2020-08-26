@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"runtime"
 	"syscall"
 	"time"
 
@@ -29,9 +28,8 @@ var RunCmd = &cobra.Command{
 				if !ok {
 					err = fmt.Errorf("unknown error: %v", r)
 				}
-				trace := make([]byte, 4096)
-				runtime.Stack(trace, true)
-				log.Str("stack_trace", string(trace)).Err(err).Panic("unknown error")
+
+				log.Err(err).Panic("unknown error")
 			}
 		}()
 

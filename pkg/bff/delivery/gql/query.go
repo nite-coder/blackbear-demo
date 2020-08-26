@@ -2,7 +2,6 @@ package gql
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/jasonsoft/log/v2"
@@ -17,8 +16,6 @@ func (r *queryResolver) GetEvents(ctx context.Context) ([]*Event, error) {
 
 	resp, err := r.eventClient.GetEvents(ctx, &emptypb.Empty{})
 	if err != nil {
-		err = fmt.Errorf("eventClient call failed, name: %s, %w", "GetEvents", err)
-		logger.Err(err).Warn("gql: eventClient call failed")
 		return nil, err
 	}
 
@@ -37,8 +34,6 @@ func (r *queryResolver) GetWallet(ctx context.Context) (*Wallet, error) {
 
 	resp, err := r.walletClient.GetWallet(ctx, &emptypb.Empty{})
 	if err != nil {
-		err = fmt.Errorf("walletClient call failed, name: %s, %w", "GetWallet", err)
-		logger.Err(err).Warn("gql: walletClient call failed")
 		return nil, err
 	}
 
