@@ -22,6 +22,8 @@ func ClientInterceptor() grpc.UnaryClientInterceptor {
 		}
 		md["request_id"] = []string{internalMiddleware.RequestIDFromContext(ctx)}
 
+		//logger.Debugf("dump client metadata: %#v", md)
+
 		// run
 		err = invoker(metadata.NewOutgoingContext(ctx, md), method, req, resp, cc, opts...)
 

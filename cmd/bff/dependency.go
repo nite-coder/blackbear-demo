@@ -22,6 +22,7 @@ import (
 	grpctrace "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc"
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/trace"
+	"go.opentelemetry.io/otel/bridge/opentracing"
 	"go.opentelemetry.io/otel/exporters/trace/jaeger"
 	"go.opentelemetry.io/otel/label"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -90,11 +91,14 @@ func initTracer(cfg config.Configuration) func() {
 
 func initTemporalClient(cfg config.Configuration) (temporalClient.Client, error) {
 	// The client is a heavyweight object that should be created once per process.
+	bridgeTracer, _ := opentracing.NewTracerPair(_tracer)
+
 	c, err := temporalClient.NewClient(client.Options{
 		HostPort: cfg.Temporal.Address,
 		ContextPropagators: []workflow.ContextPropagator{
 			starterWorkflow.NewContextPropagator(),
 		},
+		Tracer: bridgeTracer,
 	})
 	if err != nil {
 		return nil, err

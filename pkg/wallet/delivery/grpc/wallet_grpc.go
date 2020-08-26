@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"context"
-	"errors"
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
@@ -30,7 +29,7 @@ func (s *WalletServer) GetWallet(ctx context.Context, in *empty.Empty) (*proto.G
 	logger := log.FromContext(ctx)
 	logger.Debug("grpc: begin GetWallet fn")
 
-	return nil, errors.New("oops..get wallet")
+	//return nil, errors.New("oops..get wallet")
 
 	wallet, err := s.walletService.Wallet(ctx)
 	if err != nil {

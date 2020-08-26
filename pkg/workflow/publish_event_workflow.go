@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/jasonsoft/log/v2"
-	internalMiddleware "github.com/jasonsoft/starter/internal/pkg/middleware"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
 	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
 
@@ -26,12 +25,7 @@ func PublishEventWorkflow(ctx workflow.Context) error {
 	}
 	ctx = workflow.WithActivityOptions(ctx, ao)
 
-	logger := log.FromContext(context.Background())
-	if val := ctx.Value(PropagateKey); val != nil {
-		vals := val.(Values)
-		logger = log.Str("request_id", vals.Value)
-		logger.Infof("custom context propagated to workflow, key: %s, val: %s", vals.Key, vals.Value)
-	}
+	logger := getLogger(context.Background())
 
 	logger.Info("workflow: publish event workflow started")
 
@@ -53,14 +47,7 @@ func PublishEventWorkflow(ctx workflow.Context) error {
 }
 
 func WithdrawActivity(ctx context.Context) error {
-	logger := log.FromContext(ctx)
-	if val := ctx.Value(PropagateKey); val != nil {
-		vals := val.(Values)
-		logger = log.Str("request_id", vals.Value)
-		ctx = internalMiddleware.SetRequestIDToContext(ctx, vals.Value)
-		logger.Infof("custom context propagated to workflow, key: %s, val: %s", vals.Key, vals.Value)
-	}
-
+	logger := getLogger(ctx)
 	logger.Debug("workflow: begin WithdrawActivity fn")
 
 	req := walletProto.WithdrawRequest{
@@ -76,14 +63,7 @@ func WithdrawActivity(ctx context.Context) error {
 }
 
 func PublishEventActivity(ctx context.Context) error {
-	logger := log.FromContext(ctx)
-	if val := ctx.Value(PropagateKey); val != nil {
-		vals := val.(Values)
-		logger = log.Str("request_id", vals.Value)
-		ctx = internalMiddleware.SetRequestIDToContext(ctx, vals.Value)
-		logger.Infof("custom context propagated to workflow, key: %s, val: %s", vals.Key, vals.Value)
-	}
-
+	logger := getLogger(ctx)
 	logger.Debug("workflow: begin PublishEventActivity fn")
 
 	req := eventProto.UpdatePublishStatusRequest{

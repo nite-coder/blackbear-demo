@@ -3,6 +3,7 @@ package workflow
 import (
 	"context"
 
+	internalMiddleware "github.com/jasonsoft/starter/internal/pkg/middleware"
 	commonpb "go.temporal.io/api/common/v1"
 	"go.temporal.io/sdk/converter"
 	"go.temporal.io/sdk/workflow"
@@ -67,6 +68,8 @@ func (s *propagator) Extract(ctx context.Context, reader workflow.HeaderReader) 
 				return err
 			}
 			ctx = context.WithValue(ctx, PropagateKey, values)
+
+			ctx = internalMiddleware.SetRequestIDToContext(ctx, values.Value)
 		}
 		return nil
 	}); err != nil {
@@ -84,6 +87,7 @@ func (s *propagator) ExtractToWorkflow(ctx workflow.Context, reader workflow.Hea
 				return err
 			}
 			ctx = workflow.WithValue(ctx, PropagateKey, values)
+
 		}
 		return nil
 	}); err != nil {
