@@ -7,15 +7,9 @@ import "google/protobuf/empty.proto";
 
 
 service EventService {
-    rpc GetEvents (google.protobuf.Empty) returns (GetEventsResponse);
+    rpc GetEvents (GetEventsRequest) returns (GetEventsResponse);
     rpc UpdatePublishStatus (UpdatePublishStatusRequest) returns (google.protobuf.Empty);
 }
-
-enum PublishedStatus {
-    Draft = 0;
-    Published = 1;
-}
-
 
 message Event {
     int64 id = 1;
@@ -25,9 +19,22 @@ message Event {
     google.protobuf.Timestamp created_at = 5;
 }
 
+enum PublishedStatus {
+    PublishedStatus_UNSPECIFIED = 0;
+    PublishedStatus_Draft = 1;
+    PublishedStatus_Published = 2;
+}
+
+message GetEventsRequest {
+    int64 id = 1;
+    string title = 2;
+    PublishedStatus published_status = 4;
+    google.protobuf.Timestamp created_at = 5;
+
+}
 
 message GetEventsResponse {
-    repeated Event data = 1;
+    repeated Event Events = 1;
 }
 
 message UpdatePublishStatusRequest{
@@ -35,5 +42,7 @@ message UpdatePublishStatusRequest{
     string trans_id = 2;
     PublishedStatus published_status = 3;
 }
+
+
 
 

@@ -72,7 +72,7 @@ func PublishEventActivity(ctx context.Context) error {
 	req := eventProto.UpdatePublishStatusRequest{
 		EventId:         1,
 		TransId:         "ab",
-		PublishedStatus: eventProto.PublishedStatus_Published,
+		PublishedStatus: eventProto.PublishedStatus_PublishedStatus_Published,
 	}
 
 	_, err := _manager.EventClient.UpdatePublishStatus(ctx, &req)

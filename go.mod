@@ -4,11 +4,11 @@ go 1.14
 
 require (
 	github.com/99designs/gqlgen v0.12.2
+	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/golang/protobuf v1.4.2
 	github.com/google/uuid v1.1.1
 	github.com/jasonsoft/log/v2 v2.0.0-beta.4
 	github.com/jasonsoft/napnap v1.1.0
-	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/spf13/cobra v1.0.0
 	github.com/stretchr/testify v1.6.1
 	github.com/vektah/gqlparser/v2 v2.0.1
@@ -23,4 +23,6 @@ require (
 	google.golang.org/grpc v1.31.1
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/yaml.v2 v2.3.0
+	gorm.io/driver/mysql v0.3.2
+	gorm.io/gorm v0.2.38
 )

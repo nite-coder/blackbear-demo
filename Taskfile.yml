@@ -41,3 +41,11 @@ tasks:
     dir: pkg/bff/delivery/gql/
     cmds:
       - go run github.com/99designs/gqlgen --verbose
+
+
+  sql:
+    dir: deployments\database
+    cmds:
+      - migrate create -ext sql {{.name}}
+
+  

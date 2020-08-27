@@ -25,11 +25,14 @@ func NewEventServer(cfg config.Configuration, eventService event.Servicer) proto
 }
 
 // GetEvents returns all events
-func (s *EventServer) GetEvents(ctx context.Context, request *empty.Empty) (*proto.GetEventsResponse, error) {
+func (s *EventServer) GetEvents(ctx context.Context, request *proto.GetEventsRequest) (*proto.GetEventsResponse, error) {
 	logger := log.FromContext(ctx)
 	logger.Debug("grpc: begin GetEvent fn")
 
-	events, err := s.eventService.Events(ctx)
+	events, err := s.eventService.Events(ctx, event.FindEventOptions{
+		ID:    request.Id,
+		Title: request.Title,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +42,7 @@ func (s *EventServer) GetEvents(ctx context.Context, request *empty.Empty) (*pro
 		return nil, nil
 	}
 	result := proto.GetEventsResponse{
-		Data: data,
+		Events: data,
 	}
 
 	return &result, nil

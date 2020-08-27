@@ -26,11 +26,11 @@ func eventToGRPC(event *event.Event) (*proto.Event, error) {
 	return &result, nil
 }
 
-func eventsToGRPC(events []*event.Event) ([]*proto.Event, error) {
+func eventsToGRPC(events []event.Event) ([]*proto.Event, error) {
 	result := []*proto.Event{}
 
 	for _, evt := range events {
-		event, err := eventToGRPC(evt)
+		event, err := eventToGRPC(&evt)
 		if err != nil {
 			return nil, err
 		}

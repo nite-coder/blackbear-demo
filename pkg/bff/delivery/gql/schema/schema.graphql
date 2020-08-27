@@ -6,8 +6,9 @@ schema {
 }
 
 type Query {
-  getEvents:[Event!]!
-  getWallet: Wallet!
+  getEvents(input: getEventOptionsInput):[Event]!
+  getEvent(eventID: Int): Event
+  getWallet: Wallet
 }
 
 

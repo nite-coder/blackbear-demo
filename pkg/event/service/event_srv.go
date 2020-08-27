@@ -2,8 +2,6 @@ package service
 
 import (
 	"context"
-	"sync"
-	"time"
 
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
@@ -12,30 +10,21 @@ import (
 
 // EventService handles event's business logic
 type EventService struct {
-	mu     sync.RWMutex
 	config config.Configuration
-	events []*event.Event
+	repo   event.Repository
 }
 
 // NewEventService create an instance of event service
-func NewEventService(cfg config.Configuration) event.Servicer {
+func NewEventService(cfg config.Configuration, repo event.Repository) event.Servicer {
 	return &EventService{
 		config: cfg,
-		events: []*event.Event{
-			{
-				ID:              1,
-				Title:           "Golang Summit",
-				Description:     "my desc",
-				PublishedStatus: event.Draft,
-				CreatedAt:       time.Now().UTC(),
-			},
-		},
+		repo:   repo,
 	}
 }
 
 // Events returns all events
-func (srv *EventService) Events(ctx context.Context) ([]*event.Event, error) {
-	return srv.events, nil
+func (srv *EventService) Events(ctx context.Context, opts event.FindEventOptions) ([]event.Event, error) {
+	return srv.repo.Events(ctx, opts)
 }
 
 // UpdatePublishStatus update
@@ -43,15 +32,5 @@ func (srv *EventService) UpdatePublishStatus(ctx context.Context, request event.
 	logger := log.FromContext(ctx)
 	logger.Debug("begin UpdatePublishStatus fn")
 
-	srv.mu.Lock()
-	defer srv.mu.Unlock()
-
-	for _, evt := range srv.events {
-		if evt.ID == request.EventID {
-			evt.PublishedStatus = request.PublishedStatus
-			evt.CreatedAt = time.Now().UTC()
-		}
-	}
-
-	return nil
+	return srv.repo.UpdatePublishStatus(ctx, request)
 }

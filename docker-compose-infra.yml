@@ -6,8 +6,11 @@ services:
       - "3306:3306"
     environment:
       - "MYSQL_ROOT_PASSWORD=root"
+    volumes:
+        - ./mysql:/var/lib/mysql
     networks:
       - starter_net
+
   temporal:
     image: temporalio/auto-setup:0.29.0
     ports:
@@ -23,6 +26,7 @@ services:
       - starter_net
     depends_on:
       - mysql
+
   temporal-admin-tools:
     image: temporalio/admin-tools:0.29.0
     stdin_open: true
@@ -33,6 +37,7 @@ services:
       - starter_net
     depends_on:
       - temporal
+
   temporal-web:
     image: temporalio/web:0.29.0
     environment:
@@ -53,6 +58,7 @@ services:
       - "14250"
     networks:
       - starter_net
+
 networks:
   starter_net:
     name: starter_network

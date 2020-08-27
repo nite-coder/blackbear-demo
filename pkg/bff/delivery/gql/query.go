@@ -4,20 +4,21 @@ import (
 	"context"
 
 	"github.com/jasonsoft/log/v2"
+	"github.com/jasonsoft/starter/pkg/event/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func (r *queryResolver) GetEvents(ctx context.Context) ([]*Event, error) {
+func (r *queryResolver) GetEvents(ctx context.Context, input *GetEventOptionsInput) ([]*Event, error) {
 	logger := log.FromContext(ctx)
 	logger.Debug("gql: begin get events fn")
 
-	resp, err := r.eventClient.GetEvents(ctx, &emptypb.Empty{})
+	resp, err := r.eventClient.GetEvents(ctx, &proto.GetEventsRequest{})
 	if err != nil {
 		return nil, err
 	}
 
 	result := []*Event{}
-	for _, data := range resp.Data {
+	for _, data := range resp.Events {
 		event, err := eventToGQL(data)
 		if err != nil {
 			return nil, err
@@ -44,4 +45,8 @@ func (r *queryResolver) GetWallet(ctx context.Context) (*Wallet, error) {
 
 	return result, nil
 
+}
+
+func (r *queryResolver) GetEvent(ctx context.Context, eventID *int64) (*Event, error) {
+	panic("not implemented")
 }

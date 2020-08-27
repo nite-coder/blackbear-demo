@@ -23,6 +23,11 @@ type Wallet struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
+type GetEventOptionsInput struct {
+	ID    int64  `json:"id"`
+	Title string `json:"title"`
+}
+
 type PublishEventInput struct {
 	EventID int64 `json:"eventID"`
 }

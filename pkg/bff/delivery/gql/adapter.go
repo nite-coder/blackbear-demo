@@ -25,9 +25,9 @@ func eventToGQL(event *eventProto.Event) (*Event, error) {
 
 	switch event.PublishedStatus {
 	default:
-	case eventProto.PublishedStatus_Draft:
+	case eventProto.PublishedStatus_PublishedStatus_Draft:
 		result.PublishedStatus = PublishedStatusDraft
-	case eventProto.PublishedStatus_Published:
+	case eventProto.PublishedStatus_PublishedStatus_Published:
 		result.PublishedStatus = PublishedStatusPublished
 	}
 

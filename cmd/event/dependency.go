@@ -2,7 +2,11 @@ package event
 
 import (
 	"context"
+	"fmt"
+	"strings"
+	"time"
 
+	"github.com/cenkalti/backoff"
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/log/v2/handlers/console"
 	"github.com/jasonsoft/log/v2/handlers/gelf"
@@ -10,17 +14,24 @@ import (
 	"github.com/jasonsoft/starter/pkg/event"
 	eventGRPC "github.com/jasonsoft/starter/pkg/event/delivery/grpc"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
+	eventDatabase "github.com/jasonsoft/starter/pkg/event/repository/database"
 	eventService "github.com/jasonsoft/starter/pkg/event/service"
 	"go.opentelemetry.io/otel/exporters/trace/jaeger"
 	"go.opentelemetry.io/otel/label"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
 var (
+	// repo
+	_eventRepo event.Repository
+
+	// services
 	_eventService event.Servicer
 
 	// grpc server
@@ -30,8 +41,18 @@ var (
 func initialize(cfg config.Configuration) error {
 	initLogger("event", cfg)
 
-	_eventService = eventService.NewEventService(cfg)
+	db, err := initDatabase(cfg, "starter")
+	if err != nil {
+		return err
+	}
 
+	// repo
+	_eventRepo = eventDatabase.NewEventRepository(cfg, db)
+
+	// services
+	_eventService = eventService.NewEventService(cfg, _eventRepo)
+
+	// grpc server
 	_eventServer = eventGRPC.NewEventServer(cfg, _eventService)
 
 	if _eventServer == nil {
@@ -128,4 +149,52 @@ func grpcInterceptor() grpc.UnaryServerInterceptor {
 		return result, err
 
 	}
+}
+
+func initDatabase(cfg config.Configuration, name string) (*gorm.DB, error) {
+	bo := backoff.NewExponentialBackOff()
+	bo.MaxElapsedTime = time.Duration(180) * time.Second
+
+	connectionString := ""
+	for _, database := range cfg.Databases {
+		if strings.EqualFold(database.Name, name) {
+			connectionString = fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=true&multiStatements=true", database.Username, database.Password, database.Address, database.DBName)
+
+		}
+	}
+
+	log.Debugf("main: database connection string: %s", connectionString)
+
+	var db *gorm.DB
+	var err error
+	err = backoff.Retry(func() error {
+		db, err := gorm.Open(mysql.Open(connectionString), &gorm.Config{})
+		if err != nil {
+			log.Errorf("main: mysql open failed: %v", err)
+			return err
+		}
+
+		sqlDB, err := db.DB()
+		if err != nil {
+			return err
+		}
+
+		sqlDB.SetMaxIdleConns(150)
+		sqlDB.SetMaxOpenConns(300)
+		sqlDB.SetConnMaxLifetime(14400 * time.Second)
+
+		err = sqlDB.Ping()
+		if err != nil {
+			log.Errorf("main: mysql ping error: %v", err)
+			return err
+		}
+
+		return nil
+	}, bo)
+
+	if err != nil {
+		log.Panicf("main: mysql connect err: %s", err.Error())
+	}
+
+	return db, nil
 }
