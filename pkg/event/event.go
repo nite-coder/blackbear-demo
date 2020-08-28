@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/jasonsoft/starter/internal/pkg/exception"
+	"gorm.io/gorm"
 )
 
 // PublishedStatus identifies event published status.
@@ -60,6 +61,6 @@ type Servicer interface {
 
 // Repository handles event's database operations
 type Repository interface {
-	Events(ctx context.Context, opts FindEventOptions) ([]Event, error)
-	UpdatePublishStatus(ctx context.Context, request UpdateEventStatusRequest) error
+	Events(ctx context.Context, opts FindEventOptions, tx ...*gorm.DB) ([]Event, error)
+	UpdatePublishStatus(ctx context.Context, request UpdateEventStatusRequest, tx ...*gorm.DB) error
 }

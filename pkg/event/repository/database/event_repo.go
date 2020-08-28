@@ -22,11 +22,15 @@ func NewEventRepository(cfg config.Configuration, db *gorm.DB) event.Repository 
 	}
 }
 
-func (repo *EventRepo) Events(ctx context.Context, opts event.FindEventOptions) ([]event.Event, error) {
+func (repo *EventRepo) Events(ctx context.Context, opts event.FindEventOptions, tx ...*gorm.DB) ([]event.Event, error) {
+	db := repo.db
+	if tx != nil {
+		db = tx[0]
+	}
+
 	events := []event.Event{}
 
-	db := repo.buildSQL(ctx, repo.db, opts)
-
+	db = repo.buildSQL(ctx, db, opts)
 	err := db.Find(&events).Error
 	if err != nil {
 		return nil, err
@@ -49,11 +53,16 @@ func (repo *EventRepo) buildSQL(ctx context.Context, db *gorm.DB, opts event.Fin
 
 }
 
-func (repo *EventRepo) UpdatePublishStatus(ctx context.Context, request event.UpdateEventStatusRequest) error {
+func (repo *EventRepo) UpdatePublishStatus(ctx context.Context, request event.UpdateEventStatusRequest, tx ...*gorm.DB) error {
+	db := repo.db
+	if tx != nil {
+		db = tx[0]
+	}
 
-	err := repo.db.Model(event.Event{}).
+	err := db.Model(event.Event{}).
+		Where("id = ?", request.EventID).
 		UpdateColumn("published_status", request.PublishedStatus).
-		Where("id = ?", request.EventID).Error
+		Error
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

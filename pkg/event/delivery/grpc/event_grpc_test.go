@@ -11,6 +11,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/mysql"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jasonsoft/starter/internal/pkg/config"
+	internalDatabase "github.com/jasonsoft/starter/internal/pkg/database"
 	"github.com/jasonsoft/starter/pkg/event"
 	"github.com/jasonsoft/starter/pkg/event/proto"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
@@ -20,12 +21,16 @@ import (
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/test/bufconn"
+	"gorm.io/gorm"
 )
 
 const bufSize = 1024 * 1024
 
 var (
 	lis *bufconn.Listener
+
+	_db  *gorm.DB
+	_cfg config.Configuration
 	// repo
 	_eventRepo event.Repository
 
@@ -44,12 +49,13 @@ func bufDialer(string, time.Duration) (net.Conn, error) {
 }
 
 func TestMain(m *testing.M) {
-	cfg := config.New("app.yml")
+	var err error
+	_cfg = config.New("app.yml")
 
-	cfg.InitLogger("event")
+	_cfg.InitLogger("event")
 
 	// initial database
-	db, err := cfg.InitDatabase("starter")
+	_db, err = _cfg.InitDatabase("starter")
 	if err != nil {
 		panic(err)
 	}
@@ -57,14 +63,14 @@ func TestMain(m *testing.M) {
 	ctx := context.Background()
 
 	// repo
-	_eventRepo := eventDatabase.NewEventRepository(cfg, db)
+	_eventRepo := eventDatabase.NewEventRepository(_cfg, _db)
 
 	// services
-	_eventService := eventService.NewEventService(cfg, _eventRepo)
+	_eventService := eventService.NewEventService(_cfg, _eventRepo)
 
 	// grpc server
 	s := grpc.NewServer()
-	_eventServer := NewEventServer(cfg, _eventService)
+	_eventServer := NewEventServer(_cfg, _eventService)
 	proto.RegisterEventServiceServer(s, _eventServer)
 
 	go func() {
@@ -86,12 +92,16 @@ func TestMain(m *testing.M) {
 
 	s.GracefulStop()
 
-	log.Println("Do stuff AFTER the tests!")
-
 	os.Exit(exitVal)
 }
 
 func TestGetEvents(t *testing.T) {
+	// clear database data
+	err := internalDatabase.RunSQLScripts(_db, _cfg.Path("test", "database", "starter_db"))
+	if err != nil {
+		panic(err)
+	}
+
 	ctx := context.Background()
 
 	resp, err := _eventClient.GetEvents(ctx, &eventProto.GetEventsRequest{})
@@ -104,31 +114,30 @@ func TestGetEvents(t *testing.T) {
 	assert.Equal(t, proto.PublishedStatus_PublishedStatus_Draft, evt.PublishedStatus)
 }
 
-// func TestUpdatePublishStatus(t *testing.T) {
-// 	ctx := context.Background()
+func TestUpdatePublishStatus(t *testing.T) {
+	// clear database data
+	err := internalDatabase.RunSQLScripts(_db, _cfg.Path("test", "database", "starter_db"))
+	if err != nil {
+		panic(err)
+	}
 
-// 	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithDialer(bufDialer), grpc.WithInsecure())
-// 	if err != nil {
-// 		t.Fatalf("Failed to dial bufnet: %v", err)
-// 	}
-// 	defer conn.Close()
-// 	client := proto.NewEventServiceClient(conn)
+	ctx := context.Background()
 
-// 	request := proto.UpdatePublishStatusRequest{
-// 		EventId:         1,
-// 		TransId:         "abc",
-// 		PublishedStatus: proto.PublishedStatus_Published,
-// 	}
+	request := proto.UpdatePublishStatusRequest{
+		EventId:         1,
+		TransId:         "abc",
+		PublishedStatus: proto.PublishedStatus_PublishedStatus_Published,
+	}
 
-// 	_, err = client.UpdatePublishStatus(ctx, &request)
-// 	require.NoError(t, err)
+	_, err = _eventClient.UpdatePublishStatus(ctx, &request)
+	require.NoError(t, err)
 
-// 	getEventResp, err := client.GetEvents(ctx, &empty.Empty{})
-// 	require.NoError(t, err)
+	getEventResp, err := _eventClient.GetEvents(ctx, &eventProto.GetEventsRequest{})
+	require.NoError(t, err)
 
-// 	assert.Equal(t, 1, len(getEventResp.Data))
+	assert.Equal(t, 1, len(getEventResp.Events))
 
-// 	evt := getEventResp.Data[0]
-// 	assert.Equal(t, int64(1), evt.Id)
-// 	assert.Equal(t, proto.PublishedStatus_Published, evt.PublishedStatus)
-// }
+	evt := getEventResp.Events[0]
+	assert.Equal(t, int64(1), evt.Id)
+	assert.Equal(t, proto.PublishedStatus_PublishedStatus_Published, evt.PublishedStatus)
+}

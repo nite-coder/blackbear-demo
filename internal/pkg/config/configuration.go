@@ -22,6 +22,7 @@ import (
 	"gopkg.in/yaml.v2"
 	gormMySQL "gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var (
@@ -185,7 +186,10 @@ func (cfg Configuration) InitDatabase(name string) (*gorm.DB, error) {
 	var db *gorm.DB
 	var err error
 	err = backoff.Retry(func() error {
-		db, err = gorm.Open(gormMySQL.Open(connectionString), &gorm.Config{})
+		db, err = gorm.Open(gormMySQL.Open(connectionString), &gorm.Config{
+			//PrepareStmt: true,
+			Logger: logger.Default.LogMode(logger.Silent),
+		})
 		if err != nil {
 			return fmt.Errorf("main: database open failed: %w", err)
 		}

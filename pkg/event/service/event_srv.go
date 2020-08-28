@@ -30,7 +30,7 @@ func (srv *EventService) Events(ctx context.Context, opts event.FindEventOptions
 // UpdatePublishStatus update
 func (srv *EventService) UpdatePublishStatus(ctx context.Context, request event.UpdateEventStatusRequest) error {
 	logger := log.FromContext(ctx)
-	logger.Debug("begin UpdatePublishStatus fn")
+	logger.Debug("service: begin UpdatePublishStatus fn")
 
 	return srv.repo.UpdatePublishStatus(ctx, request)
 }
