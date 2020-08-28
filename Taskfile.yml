@@ -9,11 +9,11 @@ env:
 tasks:
   lint:
     cmds:
-      - docker run --rm -v  ${PWD}:/data cytopia/golint:latest ./...
+      - docker run -v  ${PWD}:/data cytopia/golint:latest ./...
 
   build:
     cmds:
-      - docker-compose build
+      - docker build --rm --file=./build/docker/starter.dockerfile --tag jasonsoft/starter:latest .
 
   test:
     cmds: 
@@ -21,7 +21,8 @@ tasks:
 
   run:
     cmds:
-      - docker-compose up --build
+      - task: build
+      - docker-compose up
 
 
   infra:

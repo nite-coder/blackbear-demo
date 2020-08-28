@@ -2,10 +2,7 @@ version: "3.5"
 services:
   # worker
   worker:
-    image: jasonsoft/starter:lastest
-    build: 
-      context: .
-      dockerfile: ./build/docker/starter.dockerfile
+    image: jasonsoft/starter:latest
     volumes:
       - "./configs/app.yml:/starter/configs/app.yml"
     network_mode: "host"
@@ -13,10 +10,7 @@ services:
 
   # wallet
   wallet:
-    image: jasonsoft/starter:lastest
-    build: 
-      context: .
-      dockerfile: ./build/docker/starter.dockerfile
+    image: jasonsoft/starter:latest
     volumes:
       - "./configs/app.yml:/starter/configs/app.yml"
     network_mode: "host"
@@ -24,10 +18,7 @@ services:
 
   # event
   event:
-    image: jasonsoft/starter:lastest
-    build: 
-      context: .
-      dockerfile: ./build/docker/starter.dockerfile
+    image: jasonsoft/starter:latest
     volumes:
       - "./configs/app.yml:/starter/configs/app.yml"
     network_mode: "host"
@@ -35,10 +26,7 @@ services:
 
   # bff
   bff:
-    image: jasonsoft/starter:lastest
-    build: 
-      context: .
-      dockerfile: ./build/docker/starter.dockerfile
+    image: jasonsoft/starter:latest
     depends_on:
         - event
     ports:
