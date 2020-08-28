@@ -2,18 +2,16 @@ package worker
 
 import (
 	"github.com/jasonsoft/log/v2"
-	"github.com/jasonsoft/log/v2/handlers/console"
-	"github.com/jasonsoft/log/v2/handlers/gelf"
 	"github.com/jasonsoft/starter/internal/pkg/config"
 	bffGRPC "github.com/jasonsoft/starter/pkg/bff/delivery/grpc"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
 	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
 	"github.com/jasonsoft/starter/pkg/workflow"
 
+	grpctrace "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc"
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/trace"
 	"go.opentelemetry.io/otel/exporters/trace/jaeger"
-	grpctrace "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc"
 	"go.opentelemetry.io/otel/label"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/grpc"
@@ -31,7 +29,7 @@ var (
 func initialize(cfg config.Configuration) error {
 	var err error
 
-	initLogger("worker", cfg)
+	cfg.InitLogger("worker")
 
 	_tracer = global.Tracer("")
 
@@ -129,25 +127,4 @@ func walletGRPCClient(cfg config.Configuration) (walletProto.WalletServiceClient
 
 	client := walletProto.NewWalletServiceClient(conn)
 	return client, nil
-}
-
-func initLogger(appID string, cfg config.Configuration) {
-	// set up log target
-	log.
-		Str("app_id", appID).
-		Str("env", cfg.Env).
-		SaveToDefault()
-
-	for _, target := range cfg.Logs {
-		switch target.Type {
-		case "console":
-			clog := console.New()
-			levels := log.GetLevelsFromMinLevel(target.MinLevel)
-			log.AddHandler(clog, levels...)
-		case "gelf":
-			graylog := gelf.New(target.ConnectionString)
-			levels := log.GetLevelsFromMinLevel(target.MinLevel)
-			log.AddHandler(graylog, levels...)
-		}
-	}
 }

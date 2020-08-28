@@ -219,12 +219,12 @@ func (cfg Configuration) InitDatabase(name string) (*gorm.DB, error) {
 }
 
 // InitTracer creates a new trace provider instance and registers it as global trace provider.
-func (cfg Configuration) InitTracer() func() {
+func (cfg Configuration) InitTracer(appID string) func() {
 	// Create and install Jaeger export pipeline
 	flush, err := jaeger.InstallNewPipeline(
 		jaeger.WithCollectorEndpoint(cfg.Jaeger.AdvertiseAddr),
 		jaeger.WithProcess(jaeger.Process{
-			ServiceName: "event",
+			ServiceName: appID,
 			Tags: []label.KeyValue{
 				label.String("version", "1.0"),
 			},

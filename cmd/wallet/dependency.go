@@ -4,20 +4,14 @@ import (
 	"context"
 
 	"github.com/jasonsoft/log/v2"
-	"github.com/jasonsoft/log/v2/handlers/console"
-	"github.com/jasonsoft/log/v2/handlers/gelf"
 	"github.com/jasonsoft/starter/internal/pkg/config"
 	"github.com/jasonsoft/starter/pkg/wallet"
 	walletGRPC "github.com/jasonsoft/starter/pkg/wallet/delivery/grpc"
 	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
 	walletService "github.com/jasonsoft/starter/pkg/wallet/service"
-	"go.opentelemetry.io/otel/exporters/trace/jaeger"
-	"go.opentelemetry.io/otel/label"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
-
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
 var (
@@ -28,7 +22,7 @@ var (
 )
 
 func initialize(cfg config.Configuration) error {
-	initLogger("wallet", cfg)
+	cfg.InitLogger("wallet")
 
 	_walletService = walletService.NewWalletService(cfg)
 
@@ -40,49 +34,6 @@ func initialize(cfg config.Configuration) error {
 
 	log.Info("wallet server is initialized")
 	return nil
-}
-
-func initLogger(appID string, cfg config.Configuration) {
-	// set up log target
-	log.
-		Str("app_id", appID).
-		Str("env", cfg.Env).
-		SaveToDefault()
-
-	for _, target := range cfg.Logs {
-		switch target.Type {
-		case "console":
-			clog := console.New()
-			levels := log.GetLevelsFromMinLevel(target.MinLevel)
-			log.AddHandler(clog, levels...)
-		case "gelf":
-			graylog := gelf.New(target.ConnectionString)
-			levels := log.GetLevelsFromMinLevel(target.MinLevel)
-			log.AddHandler(graylog, levels...)
-		}
-	}
-}
-
-// initTracer creates a new trace provider instance and registers it as global trace provider.
-func initTracer(cfg config.Configuration) func() {
-	// Create and install Jaeger export pipeline
-	flush, err := jaeger.InstallNewPipeline(
-		jaeger.WithCollectorEndpoint(cfg.Jaeger.AdvertiseAddr),
-		jaeger.WithProcess(jaeger.Process{
-			ServiceName: "wallet",
-			Tags: []label.KeyValue{
-				label.String("version", "1.0"),
-			},
-		}),
-		jaeger.WithSDK(&sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
-	)
-	if err != nil {
-		log.Err(err).Fatal("install jaeger pipleline failed.")
-	}
-
-	return func() {
-		flush()
-	}
 }
 
 func grpcInterceptor() grpc.UnaryServerInterceptor {

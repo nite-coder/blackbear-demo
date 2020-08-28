@@ -50,7 +50,7 @@ var RunCmd = &cobra.Command{
 		}
 
 		// enable tracer
-		fn := initTracer(cfg)
+		fn := cfg.InitTracer("wallet")
 		defer fn()
 		tracer := global.Tracer("")
 

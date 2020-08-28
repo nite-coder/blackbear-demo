@@ -50,7 +50,7 @@ var RunCmd = &cobra.Command{
 		}
 
 		// enable tracer
-		fn := cfg.InitTracer()
+		fn := cfg.InitTracer("event")
 		defer fn()
 		tracer := global.Tracer("")
 
