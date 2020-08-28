@@ -1,62 +1,108 @@
 package grpc
 
 import (
+	"context"
+	"log"
 	"net"
+	"os"
 	"testing"
 	"time"
 
+	_ "github.com/golang-migrate/migrate/v4/database/mysql"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/jasonsoft/starter/internal/pkg/config"
+	"github.com/jasonsoft/starter/pkg/event"
+	"github.com/jasonsoft/starter/pkg/event/proto"
+	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
+	eventDatabase "github.com/jasonsoft/starter/pkg/event/repository/database"
+	eventService "github.com/jasonsoft/starter/pkg/event/service"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/test/bufconn"
 )
 
 const bufSize = 1024 * 1024
 
-var lis *bufconn.Listener
+var (
+	lis *bufconn.Listener
+	// repo
+	_eventRepo event.Repository
+
+	// services
+	_eventService event.Servicer
+
+	// grpc server
+	_eventServer eventProto.EventServiceServer
+
+	// grpc client
+	_eventClient eventProto.EventServiceClient
+)
 
 func bufDialer(string, time.Duration) (net.Conn, error) {
 	return lis.Dial()
 }
 
 func TestMain(m *testing.M) {
-	// log.Println("Do stuff BEFORE the tests!")
+	cfg := config.New("app.yml")
 
-	// cfg := config.Configuration{}
-	// eventService := eventService.NewEventService(cfg)
+	cfg.InitLogger("event")
 
-	// s := grpc.NewServer()
-	// eventServer := NewEventServer(cfg, eventService)
-	// proto.RegisterEventServiceServer(s, eventServer)
+	// initial database
+	db, err := cfg.InitDatabase("starter")
+	if err != nil {
+		panic(err)
+	}
 
-	// go func() {
-	// 	lis = bufconn.Listen(bufSize)
-	// 	if err := s.Serve(lis); err != nil {
-	// 		log.Fatalf("Server exited with error: %v", err)
-	// 	}
-	// }()
+	ctx := context.Background()
 
-	// exitVal := m.Run()
-	// log.Println("Do stuff AFTER the tests!")
+	// repo
+	_eventRepo := eventDatabase.NewEventRepository(cfg, db)
 
-	// os.Exit(exitVal)
+	// services
+	_eventService := eventService.NewEventService(cfg, _eventRepo)
+
+	// grpc server
+	s := grpc.NewServer()
+	_eventServer := NewEventServer(cfg, _eventService)
+	proto.RegisterEventServiceServer(s, _eventServer)
+
+	go func() {
+		lis = bufconn.Listen(bufSize)
+		if err := s.Serve(lis); err != nil {
+			log.Fatalf("Server exited with error: %v", err)
+		}
+	}()
+
+	// grpc client
+	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithDialer(bufDialer), grpc.WithInsecure())
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
+	_eventClient = proto.NewEventServiceClient(conn)
+
+	exitVal := m.Run()
+
+	s.GracefulStop()
+
+	log.Println("Do stuff AFTER the tests!")
+
+	os.Exit(exitVal)
 }
 
-// func TestGetEvents(t *testing.T) {
-// 	ctx := context.Background()
+func TestGetEvents(t *testing.T) {
+	ctx := context.Background()
 
-// 	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithDialer(bufDialer), grpc.WithInsecure())
-// 	if err != nil {
-// 		t.Fatalf("Failed to dial bufnet: %v", err)
-// 	}
-// 	defer conn.Close()
-// 	client := proto.NewEventServiceClient(conn)
-// 	resp, err := client.GetEvents(ctx, &empty.Empty{})
-// 	require.NoError(t, err)
+	resp, err := _eventClient.GetEvents(ctx, &eventProto.GetEventsRequest{})
+	require.NoError(t, err)
 
-// 	assert.Equal(t, 1, len(resp.Data))
+	assert.Equal(t, 1, len(resp.Events))
 
-// 	evt := resp.Data[0]
-// 	assert.Equal(t, int64(1), evt.Id)
-// 	assert.Equal(t, proto.PublishedStatus_Draft, evt.PublishedStatus)
-// }
+	evt := resp.Events[0]
+	assert.Equal(t, int64(1), evt.Id)
+	assert.Equal(t, proto.PublishedStatus_PublishedStatus_Draft, evt.PublishedStatus)
+}
 
 // func TestUpdatePublishStatus(t *testing.T) {
 // 	ctx := context.Background()

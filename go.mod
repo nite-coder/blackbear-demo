@@ -5,6 +5,9 @@ go 1.14
 require (
 	github.com/99designs/gqlgen v0.12.2
 	github.com/cenkalti/backoff v2.2.1+incompatible
+	github.com/crossdock/crossdock-go v0.0.0-20160816171116-049aabb0122b
+	github.com/docker/docker v1.13.1
+	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/golang-migrate/migrate/v4 v4.12.2
 	github.com/golang/protobuf v1.4.2
 	github.com/google/uuid v1.1.1

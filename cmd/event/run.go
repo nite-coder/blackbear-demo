@@ -12,8 +12,8 @@ import (
 	"github.com/jasonsoft/starter/internal/pkg/config"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
 	"github.com/spf13/cobra"
-	"go.opentelemetry.io/otel/api/global"
 	grpctrace "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc"
+	"go.opentelemetry.io/otel/api/global"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 )
@@ -50,7 +50,7 @@ var RunCmd = &cobra.Command{
 		}
 
 		// enable tracer
-		fn := initTracer(cfg)
+		fn := cfg.InitTracer()
 		defer fn()
 		tracer := global.Tracer("")
 
