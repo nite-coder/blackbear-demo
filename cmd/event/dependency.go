@@ -2,11 +2,15 @@ package event
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/cenkalti/backoff"
+	"github.com/golang-migrate/migrate/v4"
+
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/log/v2/handlers/console"
 	"github.com/jasonsoft/log/v2/handlers/gelf"
@@ -21,7 +25,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
-	"gorm.io/driver/mysql"
+	gormMySQL "gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -155,20 +159,44 @@ func initDatabase(cfg config.Configuration, name string) (*gorm.DB, error) {
 	bo := backoff.NewExponentialBackOff()
 	bo.MaxElapsedTime = time.Duration(180) * time.Second
 
-	connectionString := ""
+	var connectionString string
 	for _, database := range cfg.Databases {
 		if strings.EqualFold(database.Name, name) {
-			connectionString = fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=true&multiStatements=true", database.Username, database.Password, database.Address, database.DBName)
 
+			switch strings.ToLower(database.Type) {
+			case "mysql":
+				connectionString = fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=true&multiStatements=true", database.Username, database.Password, database.Address, database.DBName)
+			}
+
+			// migrate database if needed
+			if database.IsMigrated {
+				path := cfg.Path("deployments", "database", database.DBName)
+				path = filepath.ToSlash(path) // due to migrate package path issue on window os, therefore, we need to run this
+				source := fmt.Sprintf("file://%s", path)
+				migrateDBURL := fmt.Sprintf("%s://%s", database.Type, connectionString)
+
+				m, err := migrate.New(
+					source,
+					migrateDBURL,
+				)
+				if err != nil {
+					return nil, fmt.Errorf("db migration config is wrong. db: %s, source: %s, migrateDBURL: %s %w", database.DBName, source, migrateDBURL, err)
+				}
+
+				err = m.Up()
+				if err != nil && !errors.Is(err, migrate.ErrNoChange) {
+					return nil, fmt.Errorf("db migration failed. db: %s, source: %s, migrateDBURL: %s %w", database.DBName, source, migrateDBURL, err)
+				}
+
+				log.Infof("%s database was migrated", database.DBName)
+			}
 		}
 	}
-
-	log.Debugf("main: database connection string: %s", connectionString)
 
 	var db *gorm.DB
 	var err error
 	err = backoff.Retry(func() error {
-		db, err := gorm.Open(mysql.Open(connectionString), &gorm.Config{})
+		db, err := gorm.Open(gormMySQL.Open(connectionString), &gorm.Config{})
 		if err != nil {
 			log.Errorf("main: mysql open failed: %v", err)
 			return err

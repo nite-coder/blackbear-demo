@@ -17,6 +17,7 @@ RUN apk update && \
     rm -rf /var/cache/apk/*
 
 WORKDIR /starter
+COPY --from=builder /starter/deployments/database /starter/deployments/database
 COPY --from=builder /starter/cmd/starter /starter/starter
 
 

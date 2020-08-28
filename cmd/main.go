@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	_ "github.com/golang-migrate/migrate/v4/database/mysql"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jasonsoft/starter/cmd/bff"
 	"github.com/jasonsoft/starter/cmd/event"
 	"github.com/jasonsoft/starter/cmd/wallet"

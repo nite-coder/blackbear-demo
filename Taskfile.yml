@@ -48,4 +48,10 @@ tasks:
     cmds:
       - migrate create -ext sql {{.name}}
 
+  migrate:
+    dir: deployments\database
+    cmds:
+      - migrate -source file://{{.db}}/. -database "mysql://root:root@tcp(localhost:3306)/{{.db}}" up
+
+
   

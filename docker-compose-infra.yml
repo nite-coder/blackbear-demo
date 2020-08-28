@@ -1,5 +1,6 @@
 version: "3.5"
 services:
+  # mysql
   mysql:
     image: mysql:5.7
     ports:
@@ -8,9 +9,8 @@ services:
       - "MYSQL_ROOT_PASSWORD=root"
     volumes:
         - ./mysql:/var/lib/mysql
-    networks:
-      - starter_net
 
+  # temporal
   temporal:
     image: temporalio/auto-setup:0.29.0
     ports:
@@ -22,33 +22,30 @@ services:
       - "MYSQL_PWD=root"
       - "MYSQL_SEEDS=mysql"
       - "DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml"
-    networks:
-      - starter_net
     depends_on:
       - mysql
 
+  # temporal-admin-tools
   temporal-admin-tools:
     image: temporalio/admin-tools:0.29.0
     stdin_open: true
     tty: true
     environment:
       - "TEMPORAL_CLI_ADDRESS=temporal:7233"
-    networks:
-      - starter_net
     depends_on:
       - temporal
 
+  # temporal-web
   temporal-web:
     image: temporalio/web:0.29.0
     environment:
       - "TEMPORAL_GRPC_ENDPOINT=temporal:7233"
       - "TEMPORAL_PERMIT_WRITE_API=true"
-    networks:
-      - starter_net
     ports:
       - "8088:8088"
     depends_on:
       - temporal
+
   # Jaeger
   jaeger-all-in-one:
     image: jaegertracing/all-in-one:1.18.1
@@ -56,8 +53,6 @@ services:
       - "16686:16686"
       - "14268:14268"
       - "14250"
-    networks:
-      - starter_net
 
 networks:
   starter_net:

@@ -1,7 +1,6 @@
 package config
 
 import (
-	"flag"
 	"io/ioutil"
 	stdlog "log"
 	"os"
@@ -25,15 +24,19 @@ type LogSetting struct {
 
 // Database 用來提供連線的資料庫數據
 type Database struct {
-	Name     string
-	Username string
-	Password string
-	Address  string
-	DBName   string
+	Name       string
+	Username   string
+	Password   string
+	Address    string
+	DBName     string
+	Type       string
+	IsMigrated bool `yaml:"is_migrated"`
 }
 
 // Configuration 用來代表 config 設定物件
 type Configuration struct {
+	rootDirPath string
+
 	Env       string
 	Mode      string
 	Logs      []LogSetting
@@ -68,19 +71,20 @@ type Configuration struct {
 
 // New function 創建一個 configuration instance 出來
 func New(fileName string) Configuration {
-	flag.Parse()
 	cfg := Configuration{}
 
-	rootDirPath := os.Getenv("STARTER_HOME")
-	if rootDirPath == "" {
+	cfg.rootDirPath = os.Getenv("STARTER_HOME")
+	if cfg.rootDirPath == "" {
 		//read and parse config file
 		rootDirPathStr, err := filepath.Abs(filepath.Dir(os.Args[0]))
 		if err != nil {
 			stdlog.Fatalf("config: file error: %s", err.Error())
 		}
-		rootDirPath = rootDirPathStr
+		cfg.rootDirPath = rootDirPathStr
 	}
-	configPath := filepath.Join(rootDirPath, "configs", fileName)
+
+	//configPath := filepath.Join(rootDirPath, "configs", fileName)
+	configPath := cfg.Path("configs", fileName)
 	_, err := os.Stat(configPath)
 	if err != nil {
 		stdlog.Fatalf("config: file error: %s", err.Error())
@@ -102,4 +106,8 @@ func New(fileName string) Configuration {
 	}
 
 	return cfg
+}
+
+func (cfg Configuration) Path(path ...string) string {
+	return filepath.Join(cfg.rootDirPath, filepath.Join(path...))
 }
