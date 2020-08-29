@@ -16,12 +16,18 @@ func eventToGRPC(event *event.Event) (*proto.Event, error) {
 		return nil, err
 	}
 
+	updatedAt, err := ptypes.TimestampProto(event.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+
 	result := proto.Event{
 		Id:              event.ID,
 		Title:           event.Title,
 		Description:     event.Description,
 		PublishedStatus: proto.PublishedStatus(event.PublishedStatus),
 		CreatedAt:       createdAt,
+		UpdatedAt:       updatedAt,
 	}
 	return &result, nil
 }

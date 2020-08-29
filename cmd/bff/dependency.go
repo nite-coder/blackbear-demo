@@ -2,6 +2,7 @@ package bff
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/jasonsoft/napnap"
 	"github.com/jasonsoft/napnap/middleware"
 	"github.com/jasonsoft/starter/internal/pkg/config"
+	"github.com/jasonsoft/starter/internal/pkg/exception"
 	internalMiddleware "github.com/jasonsoft/starter/internal/pkg/middleware"
 	"github.com/jasonsoft/starter/pkg/bff/delivery/gql"
 	bffGRPC "github.com/jasonsoft/starter/pkg/bff/delivery/grpc"
@@ -211,19 +213,30 @@ func newNapNap() *napnap.NapNap {
 	nap.Post("/graphql", napnap.WrapHandler(handler.GraphQL(
 		gql.NewExecutableSchema(gql.Config{Resolvers: rootResolver}),
 		handler.ErrorPresenter(
-			func(ctx context.Context, e error) *gqlerror.Error {
+			func(ctx context.Context, err error) *gqlerror.Error {
 				logger := log.FromContext(ctx)
 
-				// TODO: handle all graphql errors here
-				err := &gqlerror.Error{
-					Message: e.Error(),
+				var appErr exception.AppError
+				if errors.As(err, &appErr) {
+					gErr := &gqlerror.Error{
+						Message: appErr.Error(),
+						Extensions: map[string]interface{}{
+							"code": appErr.Code,
+						},
+					}
+					return gErr
+				}
+
+				// unknow error
+				gErr := &gqlerror.Error{
+					Message: err.Error(),
 					Extensions: map[string]interface{}{
-						"code": "401001",
+						"code": "UNKNOWN_ERR",
 					},
 				}
 
-				logger.Err(e).Error("gql: unknown error")
-				return err
+				logger.Err(err).Error("gql: unknown error")
+				return gErr
 			}),
 		handler.RecoverFunc(func(ctx context.Context, err interface{}) error {
 			logger := log.FromContext(ctx)

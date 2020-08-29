@@ -16,11 +16,17 @@ func eventToGQL(event *eventProto.Event) (*Event, error) {
 		return nil, err
 	}
 
+	updatedAt, err := ptypes.Timestamp(event.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+
 	result := Event{
 		ID:          event.Id,
 		Title:       event.Title,
 		Description: event.Description,
 		CreatedAt:   createdAt,
+		UpdatedAt:   updatedAt,
 	}
 
 	switch event.PublishedStatus {

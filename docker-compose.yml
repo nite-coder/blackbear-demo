@@ -36,8 +36,8 @@ services:
     depends_on:
         - event
         - wallet
-    # ports:
-    #   - "10080:10080"
+    ports:
+      - "10080:10080"
     volumes:
       - "./configs/app.yml:/starter/configs/app.yml"
     command: /starter/starter bff

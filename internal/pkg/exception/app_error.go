@@ -1,7 +1,5 @@
 package exception
 
-import "fmt"
-
 // AppError handles application exception.
 type AppError struct {
 	Code    string                 `json:"code"`
@@ -10,7 +8,7 @@ type AppError struct {
 }
 
 func (e AppError) Error() string {
-	return fmt.Sprintf("%s-%s", e.Code, e.Message)
+	return e.Message
 }
 
 // New functions create a new AppError instance

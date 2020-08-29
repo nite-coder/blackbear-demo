@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/jasonsoft/starter/internal/pkg/config"
 	"github.com/jasonsoft/starter/pkg/event"
@@ -63,6 +64,7 @@ func (repo *EventRepo) UpdatePublishStatus(ctx context.Context, request event.Up
 	err := db.Model(event.Event{}).
 		Where("id = ?", request.EventID).
 		UpdateColumn("published_status", request.PublishedStatus).
+		UpdateColumn("updated_at", time.Now().UTC()).
 		Error
 
 	if err != nil {

@@ -15,12 +15,7 @@ type Event struct {
 	Description     string          `json:"description"`
 	PublishedStatus PublishedStatus `json:"publishedStatus"`
 	CreatedAt       time.Time       `json:"createdAt"`
-}
-
-type Wallet struct {
-	ID        int64     `json:"id"`
-	Amount    int64     `json:"amount"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	UpdatedAt       time.Time       `json:"updatedAt"`
 }
 
 type GetEventOptionsInput struct {
@@ -30,6 +25,12 @@ type GetEventOptionsInput struct {
 
 type PublishEventInput struct {
 	EventID int64 `json:"eventID"`
+}
+
+type Wallet struct {
+	ID        int64     `json:"id"`
+	Amount    int64     `json:"amount"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 type PublishedStatus string

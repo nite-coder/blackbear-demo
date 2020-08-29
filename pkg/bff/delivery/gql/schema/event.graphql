@@ -1,4 +1,4 @@
-input publishEventInput {
+input PublishEventInput {
     eventID: Int!
 }
 
@@ -13,9 +13,10 @@ type Event {
     description: String!
     publishedStatus: PublishedStatus!
     createdAt: Time!
+    updatedAt: Time!
 }
 
-input getEventOptionsInput {
+input GetEventOptionsInput {
   id: Int!
   title: String!
 }

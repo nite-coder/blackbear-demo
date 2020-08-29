@@ -6,14 +6,14 @@ schema {
 }
 
 type Query {
-  getEvents(input: getEventOptionsInput):[Event]!
-  getEvent(eventID: Int): Event
+  getEvents(input: GetEventOptionsInput!):[Event]!
+  getEvent(eventID: Int!): Event
   getWallet: Wallet
 }
 
 
 type Mutation {
- 	publishEvent(input: [publishEventInput!]!): Boolean
+ 	publishEvent(input: PublishEventInput!): Boolean
 }
 
 

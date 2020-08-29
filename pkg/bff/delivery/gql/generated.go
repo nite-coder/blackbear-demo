@@ -49,15 +49,16 @@ type ComplexityRoot struct {
 		ID              func(childComplexity int) int
 		PublishedStatus func(childComplexity int) int
 		Title           func(childComplexity int) int
+		UpdatedAt       func(childComplexity int) int
 	}
 
 	Mutation struct {
-		PublishEvent func(childComplexity int, input []*PublishEventInput) int
+		PublishEvent func(childComplexity int, input PublishEventInput) int
 	}
 
 	Query struct {
-		GetEvent  func(childComplexity int, eventID *int64) int
-		GetEvents func(childComplexity int, input *GetEventOptionsInput) int
+		GetEvent  func(childComplexity int, eventID int64) int
+		GetEvents func(childComplexity int, input GetEventOptionsInput) int
 		GetWallet func(childComplexity int) int
 	}
 
@@ -69,11 +70,11 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	PublishEvent(ctx context.Context, input []*PublishEventInput) (*bool, error)
+	PublishEvent(ctx context.Context, input PublishEventInput) (*bool, error)
 }
 type QueryResolver interface {
-	GetEvents(ctx context.Context, input *GetEventOptionsInput) ([]*Event, error)
-	GetEvent(ctx context.Context, eventID *int64) (*Event, error)
+	GetEvents(ctx context.Context, input GetEventOptionsInput) ([]*Event, error)
+	GetEvent(ctx context.Context, eventID int64) (*Event, error)
 	GetWallet(ctx context.Context) (*Wallet, error)
 }
 
@@ -127,6 +128,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Event.Title(childComplexity), true
 
+	case "Event.updatedAt":
+		if e.complexity.Event.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.Event.UpdatedAt(childComplexity), true
+
 	case "Mutation.publishEvent":
 		if e.complexity.Mutation.PublishEvent == nil {
 			break
@@ -137,7 +145,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.PublishEvent(childComplexity, args["input"].([]*PublishEventInput)), true
+		return e.complexity.Mutation.PublishEvent(childComplexity, args["input"].(PublishEventInput)), true
 
 	case "Query.getEvent":
 		if e.complexity.Query.GetEvent == nil {
@@ -149,7 +157,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetEvent(childComplexity, args["eventID"].(*int64)), true
+		return e.complexity.Query.GetEvent(childComplexity, args["eventID"].(int64)), true
 
 	case "Query.getEvents":
 		if e.complexity.Query.GetEvents == nil {
@@ -161,7 +169,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetEvents(childComplexity, args["input"].(*GetEventOptionsInput)), true
+		return e.complexity.Query.GetEvents(childComplexity, args["input"].(GetEventOptionsInput)), true
 
 	case "Query.getWallet":
 		if e.complexity.Query.GetWallet == nil {
@@ -255,7 +263,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "schema/event.graphql", Input: `input publishEventInput {
+	{Name: "schema/event.graphql", Input: `input PublishEventInput {
     eventID: Int!
 }
 
@@ -270,9 +278,10 @@ type Event {
     description: String!
     publishedStatus: PublishedStatus!
     createdAt: Time!
+    updatedAt: Time!
 }
 
-input getEventOptionsInput {
+input GetEventOptionsInput {
   id: Int!
   title: String!
 }`, BuiltIn: false},
@@ -284,14 +293,14 @@ schema {
 }
 
 type Query {
-  getEvents(input: getEventOptionsInput):[Event]!
-  getEvent(eventID: Int): Event
+  getEvents(input: GetEventOptionsInput!):[Event]!
+  getEvent(eventID: Int!): Event
   getWallet: Wallet
 }
 
 
 type Mutation {
- 	publishEvent(input: [publishEventInput!]!): Boolean
+ 	publishEvent(input: PublishEventInput!): Boolean
 }
 
 
@@ -313,10 +322,10 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Mutation_publishEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*PublishEventInput
+	var arg0 PublishEventInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("input"))
-		arg0, err = ec.unmarshalNpublishEventInput2ᚕᚖgithubᚗcomᚋjasonsoftᚋstarterᚋpkgᚋbffᚋdeliveryᚋgqlᚐPublishEventInputᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNPublishEventInput2githubᚗcomᚋjasonsoftᚋstarterᚋpkgᚋbffᚋdeliveryᚋgqlᚐPublishEventInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -343,10 +352,10 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_getEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *int64
+	var arg0 int64
 	if tmp, ok := rawArgs["eventID"]; ok {
 		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("eventID"))
-		arg0, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		arg0, err = ec.unmarshalNInt2int64(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -358,10 +367,10 @@ func (ec *executionContext) field_Query_getEvent_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Query_getEvents_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *GetEventOptionsInput
+	var arg0 GetEventOptionsInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("input"))
-		arg0, err = ec.unmarshalOgetEventOptionsInput2ᚖgithubᚗcomᚋjasonsoftᚋstarterᚋpkgᚋbffᚋdeliveryᚋgqlᚐGetEventOptionsInput(ctx, tmp)
+		arg0, err = ec.unmarshalNGetEventOptionsInput2githubᚗcomᚋjasonsoftᚋstarterᚋpkgᚋbffᚋdeliveryᚋgqlᚐGetEventOptionsInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -578,6 +587,40 @@ func (ec *executionContext) _Event_createdAt(ctx context.Context, field graphql.
 	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Event_updatedAt(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Event",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_publishEvent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -602,7 +645,7 @@ func (ec *executionContext) _Mutation_publishEvent(ctx context.Context, field gr
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().PublishEvent(rctx, args["input"].([]*PublishEventInput))
+		return ec.resolvers.Mutation().PublishEvent(rctx, args["input"].(PublishEventInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -640,7 +683,7 @@ func (ec *executionContext) _Query_getEvents(ctx context.Context, field graphql.
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetEvents(rctx, args["input"].(*GetEventOptionsInput))
+		return ec.resolvers.Query().GetEvents(rctx, args["input"].(GetEventOptionsInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -681,7 +724,7 @@ func (ec *executionContext) _Query_getEvent(ctx context.Context, field graphql.C
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetEvent(rctx, args["eventID"].(*int64))
+		return ec.resolvers.Query().GetEvent(rctx, args["eventID"].(int64))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1952,7 +1995,7 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputgetEventOptionsInput(ctx context.Context, obj interface{}) (GetEventOptionsInput, error) {
+func (ec *executionContext) unmarshalInputGetEventOptionsInput(ctx context.Context, obj interface{}) (GetEventOptionsInput, error) {
 	var it GetEventOptionsInput
 	var asMap = obj.(map[string]interface{})
 
@@ -1980,7 +2023,7 @@ func (ec *executionContext) unmarshalInputgetEventOptionsInput(ctx context.Conte
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputpublishEventInput(ctx context.Context, obj interface{}) (PublishEventInput, error) {
+func (ec *executionContext) unmarshalInputPublishEventInput(ctx context.Context, obj interface{}) (PublishEventInput, error) {
 	var it PublishEventInput
 	var asMap = obj.(map[string]interface{})
 
@@ -2041,6 +2084,11 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "createdAt":
 			out.Values[i] = ec._Event_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._Event_updatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2483,6 +2531,11 @@ func (ec *executionContext) marshalNEvent2ᚕᚖgithubᚗcomᚋjasonsoftᚋstart
 	return ret
 }
 
+func (ec *executionContext) unmarshalNGetEventOptionsInput2githubᚗcomᚋjasonsoftᚋstarterᚋpkgᚋbffᚋdeliveryᚋgqlᚐGetEventOptionsInput(ctx context.Context, v interface{}) (GetEventOptionsInput, error) {
+	res, err := ec.unmarshalInputGetEventOptionsInput(ctx, v)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNInt2int64(ctx context.Context, v interface{}) (int64, error) {
 	res, err := graphql.UnmarshalInt64(v)
 	return res, graphql.WrapErrorWithInputPath(ctx, err)
@@ -2496,6 +2549,11 @@ func (ec *executionContext) marshalNInt2int64(ctx context.Context, sel ast.Selec
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNPublishEventInput2githubᚗcomᚋjasonsoftᚋstarterᚋpkgᚋbffᚋdeliveryᚋgqlᚐPublishEventInput(ctx context.Context, v interface{}) (PublishEventInput, error) {
+	res, err := ec.unmarshalInputPublishEventInput(ctx, v)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNPublishedStatus2githubᚗcomᚋjasonsoftᚋstarterᚋpkgᚋbffᚋdeliveryᚋgqlᚐPublishedStatus(ctx context.Context, v interface{}) (PublishedStatus, error) {
@@ -2767,32 +2825,6 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) unmarshalNpublishEventInput2ᚕᚖgithubᚗcomᚋjasonsoftᚋstarterᚋpkgᚋbffᚋdeliveryᚋgqlᚐPublishEventInputᚄ(ctx context.Context, v interface{}) ([]*PublishEventInput, error) {
-	var vSlice []interface{}
-	if v != nil {
-		if tmp1, ok := v.([]interface{}); ok {
-			vSlice = tmp1
-		} else {
-			vSlice = []interface{}{v}
-		}
-	}
-	var err error
-	res := make([]*PublishEventInput, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
-		res[i], err = ec.unmarshalNpublishEventInput2ᚖgithubᚗcomᚋjasonsoftᚋstarterᚋpkgᚋbffᚋdeliveryᚋgqlᚐPublishEventInput(ctx, vSlice[i])
-		if err != nil {
-			return nil, graphql.WrapErrorWithInputPath(ctx, err)
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) unmarshalNpublishEventInput2ᚖgithubᚗcomᚋjasonsoftᚋstarterᚋpkgᚋbffᚋdeliveryᚋgqlᚐPublishEventInput(ctx context.Context, v interface{}) (*PublishEventInput, error) {
-	res, err := ec.unmarshalInputpublishEventInput(ctx, v)
-	return &res, graphql.WrapErrorWithInputPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.WrapErrorWithInputPath(ctx, err)
@@ -2822,21 +2854,6 @@ func (ec *executionContext) marshalOEvent2ᚖgithubᚗcomᚋjasonsoftᚋstarter�
 		return graphql.Null
 	}
 	return ec._Event(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOInt2ᚖint64(ctx context.Context, v interface{}) (*int64, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := graphql.UnmarshalInt64(v)
-	return &res, graphql.WrapErrorWithInputPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOInt2ᚖint64(ctx context.Context, sel ast.SelectionSet, v *int64) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalInt64(*v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
@@ -3042,14 +3059,6 @@ func (ec *executionContext) marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 		return graphql.Null
 	}
 	return ec.___Type(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOgetEventOptionsInput2ᚖgithubᚗcomᚋjasonsoftᚋstarterᚋpkgᚋbffᚋdeliveryᚋgqlᚐGetEventOptionsInput(ctx context.Context, v interface{}) (*GetEventOptionsInput, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputgetEventOptionsInput(ctx, v)
-	return &res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 
 // endregion ***************************** type.gotpl *****************************

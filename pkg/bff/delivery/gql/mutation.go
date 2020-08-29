@@ -10,7 +10,7 @@ import (
 	"go.temporal.io/sdk/client"
 )
 
-func (r *mutationResolver) PublishEvent(ctx context.Context, input []*PublishEventInput) (*bool, error) {
+func (r *mutationResolver) PublishEvent(ctx context.Context, input PublishEventInput) (*bool, error) {
 	logger := log.FromContext(ctx)
 	logger.Debug("gql: begin publish event fn")
 
