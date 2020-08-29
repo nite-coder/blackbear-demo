@@ -50,7 +50,7 @@ func bufDialer(string, time.Duration) (net.Conn, error) {
 
 func TestMain(m *testing.M) {
 	var err error
-	_cfg = config.New("app.yml")
+	_cfg = config.New("app_test.yml")
 
 	_cfg.InitLogger("event")
 

@@ -3,38 +3,46 @@ services:
   # worker
   worker:
     image: jasonsoft/starter:latest
+    depends_on:
+      - event
+      - wallet
     volumes:
       - "./configs/app.yml:/starter/configs/app.yml"
-    network_mode: "host"
     command: /starter/starter worker
+    networks:
+      - starter_net
 
   # wallet
   wallet:
     image: jasonsoft/starter:latest
     volumes:
       - "./configs/app.yml:/starter/configs/app.yml"
-    network_mode: "host"
     command: /starter/starter wallet
-
+    networks:
+      - starter_net
+      
   # event
   event:
     image: jasonsoft/starter:latest
     volumes:
       - "./configs/app.yml:/starter/configs/app.yml"
-    network_mode: "host"
     command: /starter/starter event
+    networks:
+      - starter_net
 
   # bff
   bff:
     image: jasonsoft/starter:latest
     depends_on:
         - event
-    ports:
-      - "10080:10080"
+        - wallet
+    # ports:
+    #   - "10080:10080"
     volumes:
       - "./configs/app.yml:/starter/configs/app.yml"
-    network_mode: "host"
     command: /starter/starter bff
+    networks:
+      - starter_net
 
 networks:
   starter_net:

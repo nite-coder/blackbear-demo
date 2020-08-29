@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
 	"github.com/jasonsoft/starter/internal/pkg/config"
@@ -42,11 +43,11 @@ func (repo *EventRepo) Events(ctx context.Context, opts event.FindEventOptions, 
 func (repo *EventRepo) buildSQL(ctx context.Context, db *gorm.DB, opts event.FindEventOptions) *gorm.DB {
 
 	if opts.ID > 0 {
-		db = db.Where("id = ?", opts.ID)
+		db = db.Where("id = @id", sql.Named("id", opts.ID))
 	}
 
 	if len(opts.Title) > 0 {
-		db = db.Where("title = ?", opts.Title)
+		db = db.Where("title = @title", sql.Named("title", opts.Title))
 	}
 
 	return db

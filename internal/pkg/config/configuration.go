@@ -167,7 +167,7 @@ func (cfg Configuration) InitDatabase(name string) (*gorm.DB, error) {
 
 				m, err := migrate.New(
 					source,
-					"mysql://root:root@tcp(localhost:3306)/starter_db",
+					migrateDBURL,
 				)
 				if err != nil {
 					return nil, fmt.Errorf("db migration config is wrong. db_name: %s, source: %s, migrateDBURL: %s, error: %w", database.DBName, source, migrateDBURL, err)

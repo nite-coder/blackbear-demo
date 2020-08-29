@@ -9,6 +9,8 @@ services:
       - "MYSQL_ROOT_PASSWORD=root"
     volumes:
         - ./mysql:/var/lib/mysql
+    networks:
+      - starter_net
 
   # temporal
   temporal:
@@ -24,6 +26,8 @@ services:
       - "DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml"
     depends_on:
       - mysql
+    networks:
+      - starter_net
 
   # temporal-admin-tools
   temporal-admin-tools:
@@ -34,6 +38,8 @@ services:
       - "TEMPORAL_CLI_ADDRESS=temporal:7233"
     depends_on:
       - temporal
+    networks:
+      - starter_net
 
   # temporal-web
   temporal-web:
@@ -45,6 +51,8 @@ services:
       - "8088:8088"
     depends_on:
       - temporal
+    networks:
+      - starter_net
 
   # Jaeger
   jaeger-all-in-one:
@@ -53,6 +61,8 @@ services:
       - "16686:16686"
       - "14268:14268"
       - "14250"
+    networks:
+      - starter_net
 
 networks:
   starter_net:
