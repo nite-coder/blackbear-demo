@@ -14,7 +14,7 @@ func (r requestIDKey) String() string {
 }
 
 const (
-	key requestIDKey = "X-Request-Id"
+	key requestIDKey = "x-request-Id"
 )
 
 // RequestIDMW is a request_id middleware struct

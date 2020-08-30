@@ -1,11 +1,10 @@
 env: local
 mode: debug
 databases:
-  - name: starter
-    address: mysql:3306
-    username: root
-    password: root
-    dbname: starter_db
+  - name: starter_db
+    type: mysql
+    connection_string: root:root@tcp(mysql:3306)/starter_db?charset=utf8&parseTime=true&multiStatements=true&timeout=60s
+    is_migrated: true
 redis:
   cluster_mode: false
   addresses:

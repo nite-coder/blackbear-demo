@@ -29,7 +29,7 @@ var (
 func initialize(cfg config.Configuration) error {
 	cfg.InitLogger("event")
 
-	db, err := cfg.InitDatabase("starter")
+	db, err := cfg.InitDatabase("starter_db")
 	if err != nil {
 		return err
 	}

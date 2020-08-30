@@ -12,7 +12,7 @@ import (
 
 	"github.com/cenkalti/backoff"
 	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/mysql"
+
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/log/v2/handlers/console"
 	"github.com/jasonsoft/log/v2/handlers/gelf"
@@ -40,13 +40,10 @@ type LogSetting struct {
 
 // Database 用來提供連線的資料庫數據
 type Database struct {
-	Name       string
-	Username   string
-	Password   string
-	Address    string
-	DBName     string
-	Type       string
-	IsMigrated bool `yaml:"is_migrated"`
+	Name             string
+	ConnectionString string `yaml:"connection_string"`
+	Type             string
+	IsMigrated       bool `yaml:"is_migrated"`
 }
 
 // Configuration 用來代表 config 設定物件
@@ -149,73 +146,70 @@ func (cfg Configuration) InitDatabase(name string) (*gorm.DB, error) {
 	bo := backoff.NewExponentialBackOff()
 	bo.MaxElapsedTime = time.Duration(180) * time.Second
 
-	var connectionString string
 	for _, database := range cfg.Databases {
 		if strings.EqualFold(database.Name, name) {
 
-			switch strings.ToLower(database.Type) {
-			case "mysql":
-				connectionString = fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=true&multiStatements=true", database.Username, database.Password, database.Address, database.DBName)
-			}
-
 			// migrate database if needed
 			if database.IsMigrated {
-				path := cfg.Path("deployments", "database", database.DBName)
+				path := cfg.Path("deployments", "database", database.Name)
 				path = filepath.ToSlash(path) // due to migrate package path issue on window os, therefore, we need to run this
 				source := fmt.Sprintf("file://%s", path)
-				migrateDBURL := fmt.Sprintf("%s://%s", database.Type, connectionString)
+				migrateDBURL := fmt.Sprintf("%s://%s", database.Type, database.ConnectionString)
 
 				m, err := migrate.New(
 					source,
 					migrateDBURL,
 				)
 				if err != nil {
-					return nil, fmt.Errorf("db migration config is wrong. db_name: %s, source: %s, migrateDBURL: %s, error: %w", database.DBName, source, migrateDBURL, err)
+					return nil, fmt.Errorf("db migration config is wrong. db_name: %s, source: %s, migrateDBURL: %s, error: %w", database.Name, source, migrateDBURL, err)
 				}
 
 				err = m.Up()
 				if err != nil && !errors.Is(err, migrate.ErrNoChange) {
-					return nil, fmt.Errorf("db migration failed. db: %s, source: %s, migrateDBURL: %s, error: %w", database.DBName, source, migrateDBURL, err)
+					return nil, fmt.Errorf("db migration failed. db: %s, source: %s, migrateDBURL: %s, error: %w", database.Name, source, migrateDBURL, err)
 				}
 
-				log.Infof("%s database was migrated", database.DBName)
+				log.Infof("%s database was migrated", database.Name)
 			}
+
+			var db *gorm.DB
+			var err error
+			err = backoff.Retry(func() error {
+				db, err = gorm.Open(gormMySQL.Open(database.ConnectionString), &gorm.Config{
+					//PrepareStmt: true,
+					Logger: logger.Default.LogMode(logger.Silent),
+				})
+				if err != nil {
+					return fmt.Errorf("main: database open failed: %w", err)
+				}
+
+				sqlDB, err := db.DB()
+				if err != nil {
+					return err
+				}
+
+				sqlDB.SetMaxIdleConns(150)
+				sqlDB.SetMaxOpenConns(300)
+				sqlDB.SetConnMaxLifetime(14400 * time.Second)
+
+				err = sqlDB.Ping()
+				if err != nil {
+					return fmt.Errorf("main: database ping failed: %w", err)
+				}
+
+				return nil
+			}, bo)
+
+			if err != nil {
+				return nil, fmt.Errorf("main: database connect err: %w", err)
+			}
+
+			return db, nil
 		}
 	}
 
-	var db *gorm.DB
-	var err error
-	err = backoff.Retry(func() error {
-		db, err = gorm.Open(gormMySQL.Open(connectionString), &gorm.Config{
-			//PrepareStmt: true,
-			Logger: logger.Default.LogMode(logger.Silent),
-		})
-		if err != nil {
-			return fmt.Errorf("main: database open failed: %w", err)
-		}
+	return nil, errors.New("database name was not found")
 
-		sqlDB, err := db.DB()
-		if err != nil {
-			return err
-		}
-
-		sqlDB.SetMaxIdleConns(150)
-		sqlDB.SetMaxOpenConns(300)
-		sqlDB.SetConnMaxLifetime(14400 * time.Second)
-
-		err = sqlDB.Ping()
-		if err != nil {
-			return fmt.Errorf("main: database ping failed: %w", err)
-		}
-
-		return nil
-	}, bo)
-
-	if err != nil {
-		return nil, fmt.Errorf("main: database connect err: %w", err)
-	}
-
-	return db, nil
 }
 
 // InitTracer creates a new trace provider instance and registers it as global trace provider.
