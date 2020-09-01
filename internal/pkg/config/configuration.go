@@ -208,7 +208,7 @@ func (cfg Configuration) InitDatabase(name string) (*gorm.DB, error) {
 		}
 	}
 
-	return nil, errors.New("database name was not found")
+	return nil, fmt.Errorf("database name was not found, name: %s", name)
 
 }
 

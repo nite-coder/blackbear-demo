@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/jasonsoft/log/v2"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
 	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
 
@@ -32,13 +31,11 @@ func PublishEventWorkflow(ctx workflow.Context) error {
 
 	err := workflow.ExecuteActivity(ctx, WithdrawActivity).Get(ctx, nil)
 	if err != nil {
-		logger.Err(err).Warn("workflow: withdraw activity failed.")
 		return err
 	}
 
 	err = workflow.ExecuteActivity(ctx, PublishEventActivity).Get(ctx, nil)
 	if err != nil {
-		log.Err(err).Warn("workflow: publish event activity failed.")
 		return err
 	}
 
@@ -59,7 +56,7 @@ func WithdrawActivity(ctx context.Context) error {
 
 	_, err := _manager.WalletClient.Withdraw(ctx, &req)
 	if err != nil {
-		return err
+		return centralizedError(err)
 	}
 	return nil
 }
@@ -77,7 +74,7 @@ func PublishEventActivity(ctx context.Context) error {
 
 	_, err := _manager.EventClient.UpdatePublishStatus(ctx, &req)
 	if err != nil {
-		return err
+		return centralizedError(err)
 	}
 	return nil
 }

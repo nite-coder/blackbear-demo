@@ -1,26 +1,13 @@
 package bff
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"net/http"
-
-	"github.com/99designs/gqlgen/handler"
 	"github.com/jasonsoft/log/v2"
-	"github.com/jasonsoft/log/v2/handlers/console"
-	"github.com/jasonsoft/log/v2/handlers/gelf"
-	"github.com/jasonsoft/napnap"
-	"github.com/jasonsoft/napnap/middleware"
 	"github.com/jasonsoft/starter/internal/pkg/config"
-	"github.com/jasonsoft/starter/internal/pkg/exception"
-	internalMiddleware "github.com/jasonsoft/starter/internal/pkg/middleware"
-	"github.com/jasonsoft/starter/pkg/bff/delivery/gql"
+
 	bffGRPC "github.com/jasonsoft/starter/pkg/bff/delivery/grpc"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
 	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
 	starterWorkflow "github.com/jasonsoft/starter/pkg/workflow"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 	grpctrace "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc"
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/trace"
@@ -46,7 +33,7 @@ var (
 func initialize(cfg config.Configuration) error {
 	var err error
 
-	initLogger("bff", cfg)
+	cfg.InitLogger("bff")
 
 	_tracer = global.Tracer("")
 
@@ -158,94 +145,4 @@ func walletGRPCClient(cfg config.Configuration) (walletProto.WalletServiceClient
 
 	client := walletProto.NewWalletServiceClient(conn)
 	return client, nil
-}
-
-func initLogger(appID string, cfg config.Configuration) {
-	// set up log target
-	log.
-		Str("app_id", appID).
-		Str("env", cfg.Env).
-		SaveToDefault()
-
-	for _, target := range cfg.Logs {
-		switch target.Type {
-		case "console":
-			clog := console.New()
-			levels := log.GetLevelsFromMinLevel(target.MinLevel)
-			log.AddHandler(clog, levels...)
-		case "gelf":
-			graylog := gelf.New(target.ConnectionString)
-			levels := log.GetLevelsFromMinLevel(target.MinLevel)
-			log.AddHandler(graylog, levels...)
-		}
-	}
-}
-
-func verifyOrigin(origin string) bool {
-	return true
-}
-
-func newNapNap() *napnap.NapNap {
-	nap := napnap.New()
-	nap.Use(internalMiddleware.NewRequestIDMW())
-	nap.Use(internalMiddleware.NewTracerMW())
-	nap.Use(internalMiddleware.NewLoggerMW())
-
-	// turn on CORS feature
-	options := middleware.Options{}
-	options.AllowOriginFunc = verifyOrigin
-	options.AllowedMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTION", "HEAD"}
-	options.AllowedHeaders = []string{"*", "Authorization", "Content-Type", "Origin", "Content-Length", "accept"}
-	nap.Use(middleware.NewCors(options))
-
-	nap.Get("/", func(c *napnap.Context) error {
-		return c.String(200, "Hello World")
-	})
-
-	nap.Get("/ping", func(c *napnap.Context) error {
-		return c.String(http.StatusOK, "pong!!!")
-	})
-
-	nap.Get("/playground", napnap.WrapHandler(handler.Playground("GraphQL playground", "/graphql")))
-
-	rootResolver := gql.NewResolver(_eventClient, _walletClient, _temporalClient)
-
-	nap.Post("/graphql", napnap.WrapHandler(handler.GraphQL(
-		gql.NewExecutableSchema(gql.Config{Resolvers: rootResolver}),
-		handler.ErrorPresenter(
-			func(ctx context.Context, err error) *gqlerror.Error {
-				logger := log.FromContext(ctx)
-
-				var appErr exception.AppError
-				if errors.As(err, &appErr) {
-					gErr := &gqlerror.Error{
-						Message: appErr.Error(),
-						Extensions: map[string]interface{}{
-							"code": appErr.Code,
-						},
-					}
-					return gErr
-				}
-
-				// unknow error
-				gErr := &gqlerror.Error{
-					Message: err.Error(),
-					Extensions: map[string]interface{}{
-						"code": "UNKNOWN_ERR",
-					},
-				}
-
-				logger.Err(err).Error("gql: unknown error")
-				return gErr
-			}),
-		handler.RecoverFunc(func(ctx context.Context, err interface{}) error {
-			logger := log.FromContext(ctx)
-			myErr := fmt.Errorf("Internal server error! %w", err)
-
-			logger.Err(myErr).Error("Internal server error!")
-			return myErr
-		}),
-	)))
-
-	return nap
 }

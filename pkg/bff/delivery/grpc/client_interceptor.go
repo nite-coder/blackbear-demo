@@ -2,7 +2,6 @@ package gql
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/jasonsoft/log/v2"
 	internalMiddleware "github.com/jasonsoft/starter/internal/pkg/middleware"
@@ -27,10 +26,9 @@ func ClientInterceptor() grpc.UnaryClientInterceptor {
 		// run
 		err = invoker(metadata.NewOutgoingContext(ctx, md), method, req, resp, cc, opts...)
 
-		// centralized error log
 		if err != nil {
+			// durmp request information
 			logger.Interface("req", req).StackTrace().Err(err).Warnf("grpc client call failed, method: %s", method)
-			err = fmt.Errorf("grpc client call failed, method: %s, %w", method, err)
 		}
 
 		return err

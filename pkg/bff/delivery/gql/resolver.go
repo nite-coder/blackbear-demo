@@ -15,15 +15,6 @@ type Resolver struct {
 	temporalClient temporalClient.Client
 }
 
-// NewResolver create an instance of Resolver
-func NewResolver(eventClient eventProto.EventServiceClient, walletClient walletProto.WalletServiceClient, temporalClient temporalClient.Client) *Resolver {
-	return &Resolver{
-		eventClient:    eventClient,
-		walletClient:   walletClient,
-		temporalClient: temporalClient,
-	}
-}
-
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 

@@ -11,6 +11,7 @@ import (
 
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
+	"github.com/jasonsoft/starter/pkg/bff/delivery/gql"
 	"github.com/spf13/cobra"
 )
 
@@ -46,7 +47,7 @@ var RunCmd = &cobra.Command{
 		defer fn()
 
 		// start http server
-		nap := newNapNap()
+		nap := gql.NewHTTPServer(_eventClient, _walletClient, _temporalClient)
 		httpServer := &http.Server{
 			Addr:    cfg.BFF.HTTPBind,
 			Handler: nap,

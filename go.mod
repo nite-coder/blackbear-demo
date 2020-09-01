@@ -7,7 +7,7 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/golang-migrate/migrate/v4 v4.12.2
 	github.com/golang/protobuf v1.4.2
-	github.com/google/uuid v1.1.1
+	github.com/google/uuid v1.1.2
 	github.com/jasonsoft/log/v2 v2.0.0-beta.4
 	github.com/jasonsoft/napnap v1.1.0
 	github.com/spf13/cobra v1.0.0
@@ -24,6 +24,6 @@ require (
 	google.golang.org/grpc v1.31.1
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/yaml.v2 v2.3.0
-	gorm.io/driver/mysql v1.0.0
-	gorm.io/gorm v1.9.19
+	gorm.io/driver/mysql v1.0.1
+	gorm.io/gorm v1.20.0
 )

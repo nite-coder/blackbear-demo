@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/jasonsoft/starter/internal/pkg/exception"
+	"google.golang.org/grpc/codes"
 	"gorm.io/gorm"
 )
 
@@ -20,7 +21,7 @@ const (
 
 var (
 	// ErrNotFound means resource not found
-	ErrNotFound = exception.New("NOT_FOUND", "event resource was not found")
+	ErrNotFound = &exception.AppError{Code: "NOT_FOUND", Message: "resource was not found or status was wrong", Status: codes.NotFound}
 )
 
 // Event is Event

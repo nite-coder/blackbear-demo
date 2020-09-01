@@ -10,6 +10,7 @@ import (
 
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
+	eventGRPC "github.com/jasonsoft/starter/pkg/event/delivery/grpc"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
 	"github.com/spf13/cobra"
 	grpctrace "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc"
@@ -75,7 +76,7 @@ var RunCmd = &cobra.Command{
 			),
 			grpc.ChainUnaryInterceptor(
 				grpctrace.UnaryServerInterceptor(tracer),
-				grpcInterceptor(),
+				eventGRPC.Interceptor(),
 			),
 			grpc.StreamInterceptor(grpctrace.StreamServerInterceptor(tracer)),
 		)

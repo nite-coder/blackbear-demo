@@ -20,6 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/test/bufconn"
 	"gorm.io/gorm"
 )
@@ -55,7 +56,7 @@ func TestMain(m *testing.M) {
 	_cfg.InitLogger("event")
 
 	// initial database
-	_db, err = _cfg.InitDatabase("starter")
+	_db, err = _cfg.InitDatabase("starter_db")
 	if err != nil {
 		panic(err)
 	}
@@ -69,13 +70,29 @@ func TestMain(m *testing.M) {
 	_eventService := eventService.NewEventService(_cfg, _eventRepo)
 
 	// grpc server
-	s := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+		grpc.KeepaliveParams(
+			keepalive.ServerParameters{
+				Time:    (time.Duration(5) * time.Second), // Ping the client if it is idle for 5 seconds to ensure the connection is still active
+				Timeout: (time.Duration(5) * time.Second), // Wait 5 second for the ping ack before assuming the connection is dead
+			},
+		),
+		grpc.KeepaliveEnforcementPolicy(
+			keepalive.EnforcementPolicy{
+				MinTime:             (time.Duration(2) * time.Second), // If a client pings more than once every 2 seconds, terminate the connection
+				PermitWithoutStream: true,                             // Allow pings even when there are no active streams
+			},
+		),
+		grpc.ChainUnaryInterceptor(
+			Interceptor(),
+		),
+	)
 	_eventServer := NewEventServer(_cfg, _eventService)
-	proto.RegisterEventServiceServer(s, _eventServer)
+	proto.RegisterEventServiceServer(grpcServer, _eventServer)
 
 	go func() {
 		lis = bufconn.Listen(bufSize)
-		if err := s.Serve(lis); err != nil {
+		if err := grpcServer.Serve(lis); err != nil {
 			log.Fatalf("Server exited with error: %v", err)
 		}
 	}()
@@ -90,7 +107,7 @@ func TestMain(m *testing.M) {
 
 	exitVal := m.Run()
 
-	s.GracefulStop()
+	grpcServer.GracefulStop()
 
 	os.Exit(exitVal)
 }

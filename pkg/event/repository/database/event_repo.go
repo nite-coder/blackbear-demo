@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"time"
 
 	"github.com/jasonsoft/starter/internal/pkg/config"
@@ -61,18 +60,15 @@ func (repo *EventRepo) UpdatePublishStatus(ctx context.Context, request event.Up
 		db = tx[0]
 	}
 
-	err := db.Model(event.Event{}).
+	result := db.Model(event.Event{}).
 		Where("id = ?", request.EventID).
+		Where("published_status = ?", event.Draft).
 		UpdateColumn("published_status", request.PublishedStatus).
-		UpdateColumn("updated_at", time.Now().UTC()).
-		Error
+		UpdateColumn("updated_at", time.Now().UTC())
 
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return event.ErrNotFound
-		}
-		return err
+	if result.RowsAffected == 0 {
+		return event.ErrNotFound
 	}
 
-	return nil
+	return result.Error
 }

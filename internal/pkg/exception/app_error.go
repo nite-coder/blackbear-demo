@@ -1,9 +1,12 @@
 package exception
 
+import "google.golang.org/grpc/codes"
+
 // AppError handles application exception.
 type AppError struct {
 	Code    string                 `json:"code"`
 	Message string                 `json:"message"`
+	Status  codes.Code             `json:"status"`
 	Details map[string]interface{} `json:"details"`
 }
 
