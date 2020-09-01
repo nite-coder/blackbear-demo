@@ -14,9 +14,9 @@ type PublishedStatus int32
 
 const (
 	// Draft ...
-	Draft PublishedStatus = 0
+	Draft PublishedStatus = 1
 	// Published ...
-	Published PublishedStatus = 1
+	Published PublishedStatus = 2
 )
 
 var (

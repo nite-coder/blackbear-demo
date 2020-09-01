@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"database/sql"
-	"time"
 
 	"github.com/jasonsoft/starter/internal/pkg/config"
 	"github.com/jasonsoft/starter/pkg/event"
@@ -63,8 +62,7 @@ func (repo *EventRepo) UpdatePublishStatus(ctx context.Context, request event.Up
 	result := db.Model(event.Event{}).
 		Where("id = ?", request.EventID).
 		Where("published_status = ?", event.Draft).
-		UpdateColumn("published_status", request.PublishedStatus).
-		UpdateColumn("updated_at", time.Now().UTC())
+		UpdateColumn("published_status", request.PublishedStatus)
 
 	if result.RowsAffected == 0 {
 		return event.ErrNotFound

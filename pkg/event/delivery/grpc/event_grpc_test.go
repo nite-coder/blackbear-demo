@@ -157,4 +157,7 @@ func TestUpdatePublishStatus(t *testing.T) {
 	evt := getEventResp.Events[0]
 	assert.Equal(t, int64(1), evt.Id)
 	assert.Equal(t, proto.PublishedStatus_PublishedStatus_Published, evt.PublishedStatus)
+
+	_, err = _eventClient.UpdatePublishStatus(ctx, &request)
+	assert.EqualError(t, err, "rpc error: code = NotFound desc = resource was not found or status was wrong")
 }
