@@ -60,8 +60,8 @@ func (repo *EventRepo) UpdatePublishStatus(ctx context.Context, request event.Up
 	}
 
 	result := db.Model(event.Event{}).
-		Where("id = ?", request.EventID).
-		Where("published_status = ?", event.Draft).
+		Where("id = @id", sql.Named("id", request.EventID)).
+		Where("published_status = @published_status", sql.Named("published_status", event.Draft)).
 		UpdateColumn("published_status", request.PublishedStatus)
 
 	if result.RowsAffected == 0 {

@@ -48,10 +48,8 @@ type UpdateEventStatusRequest struct {
 
 // FindEventOptions is a query condition for finding events
 type FindEventOptions struct {
-	ID              int64
-	Title           string
-	PublishedStatus PublishedStatus
-	CreatedAt       time.Time
+	ID    int64  `gorm:"column:id;primary_key" json:"id"`
+	Title string `gorm:"column:title" json:"title"`
 }
 
 // Servicer handles event's business logic
