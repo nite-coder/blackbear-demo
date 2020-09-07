@@ -54,8 +54,8 @@ func InitDatabase(cfg config.Configuration, name string) (*gorm.DB, error) {
 			err = backoff.Retry(func() error {
 
 				gormConfig := gorm.Config{
-					//PrepareStmt: true,
-					Logger: logger.Default.LogMode(logger.Silent),
+					PrepareStmt: true,
+					Logger:      logger.Default.LogMode(logger.Silent),
 				}
 
 				switch strings.ToLower(database.Type) {

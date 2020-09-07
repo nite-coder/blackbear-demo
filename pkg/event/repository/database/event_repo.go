@@ -42,12 +42,18 @@ func (repo *EventRepo) Events(ctx context.Context, opts event.FindEventOptions, 
 
 func (repo *EventRepo) buildSQL(ctx context.Context, db *gorm.DB, opts event.FindEventOptions) *gorm.DB {
 
-	if opts.ID > 0 {
-		db = db.Where("id = @id", sql.Named("id", opts.ID))
-	}
+	// if opts.ID > 0 {
+	// 	db = db.Where("id = @id", sql.Named("id", opts.ID))
+	// }
 
-	if len(opts.Title) > 0 {
-		db = db.Where("title = @title", sql.Named("title", opts.Title))
+	// if len(opts.Title) > 0 {
+	// 	db = db.Where("title = @title", sql.Named("title", opts.Title))
+	// }
+	db = db.Where(opts)
+
+	if opts.CreatedAtStart.IsZero() == false && opts.CreatedAtEnd.IsZero() == false {
+		db = db.Where("created_at >= @created_at", sql.Named("created_at_start", opts.CreatedAtStart)).
+			Where("created_at < @created_at_end", sql.Named("created_at_end", opts.CreatedAtEnd))
 	}
 
 	return db
