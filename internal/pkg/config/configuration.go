@@ -12,10 +12,10 @@ import (
 
 	"github.com/cenkalti/backoff"
 	"github.com/golang-migrate/migrate/v4"
-
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/log/v2/handlers/console"
 	"github.com/jasonsoft/log/v2/handlers/gelf"
+	internalDatabase "github.com/jasonsoft/starter/internal/pkg/database"
 	"go.opentelemetry.io/otel/exporters/trace/jaeger"
 	"go.opentelemetry.io/otel/label"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -181,6 +181,11 @@ func (cfg Configuration) InitDatabase(name string) (*gorm.DB, error) {
 				})
 				if err != nil {
 					return fmt.Errorf("main: database open failed: %w", err)
+				}
+
+				err = db.Use(&internalDatabase.TelemetryPlugin{})
+				if err != nil {
+					log.Err(err).Warn("database: register telemetry plugin failed")
 				}
 
 				sqlDB, err := db.DB()

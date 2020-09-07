@@ -27,6 +27,7 @@ func (repo *EventRepo) Events(ctx context.Context, opts event.FindEventOptions, 
 	if tx != nil {
 		db = tx[0]
 	}
+	db = db.WithContext(ctx)
 
 	events := []event.Event{}
 
@@ -58,6 +59,7 @@ func (repo *EventRepo) UpdatePublishStatus(ctx context.Context, request event.Up
 	if tx != nil {
 		db = tx[0]
 	}
+	db = db.WithContext(ctx)
 
 	result := db.Model(event.Event{}).
 		Where("id = @id", sql.Named("id", request.EventID)).
