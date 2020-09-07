@@ -3,6 +3,7 @@ package event
 import (
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
+	"github.com/jasonsoft/starter/internal/pkg/database"
 	"github.com/jasonsoft/starter/pkg/event"
 	eventGRPC "github.com/jasonsoft/starter/pkg/event/delivery/grpc"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
@@ -24,7 +25,7 @@ var (
 func initialize(cfg config.Configuration) error {
 	cfg.InitLogger("event")
 
-	db, err := cfg.InitDatabase("starter_db")
+	db, err := database.InitDatabase(cfg, "starter_db")
 	if err != nil {
 		return err
 	}

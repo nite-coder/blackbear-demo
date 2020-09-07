@@ -10,6 +10,7 @@ import (
 
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
+	walletGRPC "github.com/jasonsoft/starter/pkg/wallet/delivery/grpc"
 	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
 	"github.com/spf13/cobra"
 	grpctrace "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc"
@@ -75,7 +76,7 @@ var RunCmd = &cobra.Command{
 			),
 			grpc.ChainUnaryInterceptor(
 				grpctrace.UnaryServerInterceptor(tracer),
-				grpcInterceptor(),
+				walletGRPC.Interceptor(),
 			),
 			grpc.StreamInterceptor(grpctrace.StreamServerInterceptor(tracer)),
 		)

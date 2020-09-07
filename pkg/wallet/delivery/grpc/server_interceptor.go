@@ -41,7 +41,7 @@ func Interceptor() grpc.UnaryServerInterceptor {
 			}
 
 			// unknow error
-			logger.Err(err).Error("wallet grpc unknown error")
+			logger.Err(err).Error("event grpc unknown error")
 			gErr := status.Error(codes.Unknown, err.Error())
 			return result, gErr
 		}

@@ -11,6 +11,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/mysql"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jasonsoft/starter/internal/pkg/config"
+	"github.com/jasonsoft/starter/internal/pkg/database"
 	internalDatabase "github.com/jasonsoft/starter/internal/pkg/database"
 	"github.com/jasonsoft/starter/pkg/event"
 	"github.com/jasonsoft/starter/pkg/event/proto"
@@ -56,7 +57,7 @@ func TestMain(m *testing.M) {
 	_cfg.InitLogger("event")
 
 	// initial database
-	_db, err = _cfg.InitDatabase("starter_db")
+	_db, err = database.InitDatabase(_cfg, "starter_db")
 	if err != nil {
 		panic(err)
 	}

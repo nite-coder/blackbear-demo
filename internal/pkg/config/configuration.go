@@ -1,28 +1,18 @@
 package config
 
 import (
-	"errors"
-	"fmt"
 	"io/ioutil"
 	stdlog "log"
 	"os"
 	"path/filepath"
-	"strings"
-	"time"
 
-	"github.com/cenkalti/backoff"
-	"github.com/golang-migrate/migrate/v4"
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/log/v2/handlers/console"
 	"github.com/jasonsoft/log/v2/handlers/gelf"
-	internalDatabase "github.com/jasonsoft/starter/internal/pkg/database"
 	"go.opentelemetry.io/otel/exporters/trace/jaeger"
 	"go.opentelemetry.io/otel/label"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"gopkg.in/yaml.v2"
-	gormMySQL "gorm.io/driver/mysql"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 var (
@@ -140,81 +130,6 @@ func (cfg Configuration) InitLogger(appID string) {
 			log.AddHandler(graylog, levels...)
 		}
 	}
-}
-
-func (cfg Configuration) InitDatabase(name string) (*gorm.DB, error) {
-	bo := backoff.NewExponentialBackOff()
-	bo.MaxElapsedTime = time.Duration(180) * time.Second
-
-	for _, database := range cfg.Databases {
-		if strings.EqualFold(database.Name, name) {
-
-			// migrate database if needed
-			if database.IsMigrated {
-				path := cfg.Path("deployments", "database", database.Name)
-				path = filepath.ToSlash(path) // due to migrate package path issue on window os, therefore, we need to run this
-				source := fmt.Sprintf("file://%s", path)
-				migrateDBURL := fmt.Sprintf("%s://%s", database.Type, database.ConnectionString)
-
-				m, err := migrate.New(
-					source,
-					migrateDBURL,
-				)
-				if err != nil {
-					return nil, fmt.Errorf("db migration config is wrong. db_name: %s, source: %s, migrateDBURL: %s, error: %w", database.Name, source, migrateDBURL, err)
-				}
-
-				err = m.Up()
-				if err != nil && !errors.Is(err, migrate.ErrNoChange) {
-					return nil, fmt.Errorf("db migration failed. db: %s, source: %s, migrateDBURL: %s, error: %w", database.Name, source, migrateDBURL, err)
-				}
-
-				log.Infof("%s database was migrated", database.Name)
-			}
-
-			var db *gorm.DB
-			var err error
-			err = backoff.Retry(func() error {
-				db, err = gorm.Open(gormMySQL.Open(database.ConnectionString), &gorm.Config{
-					//PrepareStmt: true,
-					Logger: logger.Default.LogMode(logger.Silent),
-				})
-				if err != nil {
-					return fmt.Errorf("main: database open failed: %w", err)
-				}
-
-				err = db.Use(&internalDatabase.TelemetryPlugin{})
-				if err != nil {
-					log.Err(err).Warn("database: register telemetry plugin failed")
-				}
-
-				sqlDB, err := db.DB()
-				if err != nil {
-					return err
-				}
-
-				sqlDB.SetMaxIdleConns(150)
-				sqlDB.SetMaxOpenConns(300)
-				sqlDB.SetConnMaxLifetime(14400 * time.Second)
-
-				err = sqlDB.Ping()
-				if err != nil {
-					return fmt.Errorf("main: database ping failed: %w", err)
-				}
-
-				return nil
-			}, bo)
-
-			if err != nil {
-				return nil, fmt.Errorf("main: database connect err: %w", err)
-			}
-
-			return db, nil
-		}
-	}
-
-	return nil, fmt.Errorf("database name was not found, name: %s", name)
-
 }
 
 // InitTracer creates a new trace provider instance and registers it as global trace provider.
