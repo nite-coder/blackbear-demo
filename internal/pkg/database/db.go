@@ -54,8 +54,8 @@ func InitDatabase(cfg config.Configuration, name string) (*gorm.DB, error) {
 			err = backoff.Retry(func() error {
 
 				gormConfig := gorm.Config{
-					PrepareStmt: true,
-					Logger:      logger.Default.LogMode(logger.Silent),
+					//PrepareStmt: true,
+					Logger: logger.Default.LogMode(logger.Silent),
 				}
 
 				switch strings.ToLower(database.Type) {
@@ -112,7 +112,7 @@ func RunSQLScripts(db *gorm.DB, dirPath string) error {
 		if err != nil {
 			return err
 		}
-
+		// TODO: it seems to me that if we turn gorm prepare config to true, we will receive the error here.  Now, we just turn that off.
 		err = db.Exec(string(data)).Error
 		if err != nil {
 			return err
