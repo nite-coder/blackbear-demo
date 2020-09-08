@@ -1,1 +1,1 @@
-go build -o starter.exe && starter bff
+go build -o starter.exe && starter frontend

@@ -3,7 +3,7 @@ package worker
 import (
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
-	bffGRPC "github.com/jasonsoft/starter/pkg/bff/delivery/grpc"
+	frontendGRPC "github.com/jasonsoft/starter/pkg/frontend/delivery/grpc"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
 	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
 	"github.com/jasonsoft/starter/pkg/workflow"
@@ -87,7 +87,7 @@ func eventGRPCClient(cfg config.Configuration) (eventProto.EventServiceClient, e
 		}),
 		grpc.WithChainUnaryInterceptor(
 			grpctrace.UnaryClientInterceptor(_tracer),
-			bffGRPC.ClientInterceptor(),
+			frontendGRPC.ClientInterceptor(),
 		),
 		grpc.WithStreamInterceptor(grpctrace.StreamClientInterceptor(_tracer)),
 	)
@@ -113,7 +113,7 @@ func walletGRPCClient(cfg config.Configuration) (walletProto.WalletServiceClient
 		}),
 		grpc.WithChainUnaryInterceptor(
 			grpctrace.UnaryClientInterceptor(_tracer),
-			bffGRPC.ClientInterceptor(),
+			frontendGRPC.ClientInterceptor(),
 		),
 		grpc.WithStreamInterceptor(grpctrace.StreamClientInterceptor(_tracer)),
 	)

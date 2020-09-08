@@ -1,11 +1,10 @@
-package bff
+package frontend
 
 import (
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
-
-	bffGRPC "github.com/jasonsoft/starter/pkg/bff/delivery/grpc"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
+	frontendGRPC "github.com/jasonsoft/starter/pkg/frontend/delivery/grpc"
 	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
 	starterWorkflow "github.com/jasonsoft/starter/pkg/workflow"
 	grpctrace "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc"
@@ -33,7 +32,7 @@ var (
 func initialize(cfg config.Configuration) error {
 	var err error
 
-	cfg.InitLogger("bff")
+	cfg.InitLogger("frontend")
 
 	_tracer = global.Tracer("")
 
@@ -52,7 +51,7 @@ func initialize(cfg config.Configuration) error {
 		return err
 	}
 
-	log.Info("bff server is initialized")
+	log.Info("frontend server is initialized")
 	return nil
 }
 
@@ -62,7 +61,7 @@ func initTracer(cfg config.Configuration) func() {
 	flush, err := jaeger.InstallNewPipeline(
 		jaeger.WithCollectorEndpoint(cfg.Jaeger.AdvertiseAddr),
 		jaeger.WithProcess(jaeger.Process{
-			ServiceName: "bff",
+			ServiceName: "frontend",
 			Tags: []label.KeyValue{
 				label.String("version", "1.0"),
 			},
@@ -105,7 +104,7 @@ func eventGRPCClient(cfg config.Configuration) (eventProto.EventServiceClient, e
 		}),
 		grpc.WithChainUnaryInterceptor(
 			grpctrace.UnaryClientInterceptor(_tracer),
-			bffGRPC.ClientInterceptor(),
+			frontendGRPC.ClientInterceptor(),
 		),
 		grpc.WithStreamInterceptor(grpctrace.StreamClientInterceptor(_tracer)),
 	)
@@ -131,7 +130,7 @@ func walletGRPCClient(cfg config.Configuration) (walletProto.WalletServiceClient
 		}),
 		grpc.WithChainUnaryInterceptor(
 			grpctrace.UnaryClientInterceptor(_tracer),
-			bffGRPC.ClientInterceptor(),
+			frontendGRPC.ClientInterceptor(),
 		),
 		grpc.WithStreamInterceptor(grpctrace.StreamClientInterceptor(_tracer)),
 	)

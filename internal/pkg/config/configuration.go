@@ -58,7 +58,7 @@ type Configuration struct {
 	Jaeger struct {
 		AdvertiseAddr string `yaml:"advertise_addr"`
 	}
-	BFF struct {
+	Frontend struct {
 		HTTPBind          string `yaml:"http_bind"`
 		HTTPAdvertiseAddr string `yaml:"http_advertise_addr"`
 	}

@@ -1,4 +1,4 @@
-package bff
+package frontend
 
 import (
 	"context"
@@ -11,13 +11,13 @@ import (
 
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
-	"github.com/jasonsoft/starter/pkg/bff/delivery/gql"
+	"github.com/jasonsoft/starter/pkg/frontend/delivery/gql"
 	"github.com/spf13/cobra"
 )
 
-// RunCmd 是 bff service 的進入口
+// RunCmd 是 frontend service 的進入口
 var RunCmd = &cobra.Command{
-	Use:   "bff",
+	Use:   "frontend",
 	Short: "",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -38,7 +38,7 @@ var RunCmd = &cobra.Command{
 		cfg := config.New("app.yml")
 		err := initialize(cfg)
 		if err != nil {
-			log.Panicf("main: bff initialize failed: %v", err)
+			log.Panicf("main: frontend initialize failed: %v", err)
 			return
 		}
 
@@ -49,13 +49,13 @@ var RunCmd = &cobra.Command{
 		// start http server
 		nap := gql.NewHTTPServer(_eventClient, _walletClient, _temporalClient)
 		httpServer := &http.Server{
-			Addr:    cfg.BFF.HTTPBind,
+			Addr:    cfg.Frontend.HTTPBind,
 			Handler: nap,
 		}
 
 		go func() {
 			// service connections
-			log.Infof("bff is serving HTTP on %s\n", httpServer.Addr)
+			log.Infof("frontend is serving HTTP on %s\n", httpServer.Addr)
 			err := httpServer.ListenAndServe()
 			if err != nil {
 				log.Errorf("main: http server listen failed: %v\n", err)

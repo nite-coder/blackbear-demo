@@ -3,7 +3,7 @@
 go run github.com/99designs/gqlgen init
 ```
 
-cd pkg/bff/delivery/gql
+cd pkg/frontend/delivery/gql
 
 1. re-generate
 ```

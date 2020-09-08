@@ -21,7 +21,7 @@ logs:
   - name: clog
     type: console
     min_level: debug
-bff:
+frontend:
   http_bind: ":10080"
   http_advertise_addr: "localhost:10080"
 event:
