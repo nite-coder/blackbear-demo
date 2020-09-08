@@ -43,7 +43,7 @@ var RunCmd = &cobra.Command{
 		}
 
 		// enable tracer
-		fn := initTracer(cfg)
+		fn := cfg.InitTracer("frontend")
 		defer fn()
 
 		// start http server

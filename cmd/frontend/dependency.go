@@ -3,22 +3,17 @@ package frontend
 import (
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
+	eventGRPC "github.com/jasonsoft/starter/pkg/event/delivery/grpc"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
-	frontendGRPC "github.com/jasonsoft/starter/pkg/frontend/delivery/grpc"
+	walletGRPC "github.com/jasonsoft/starter/pkg/wallet/delivery/grpc"
 	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
 	starterWorkflow "github.com/jasonsoft/starter/pkg/workflow"
-	grpctrace "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc"
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/trace"
 	"go.opentelemetry.io/otel/bridge/opentracing"
-	"go.opentelemetry.io/otel/exporters/trace/jaeger"
-	"go.opentelemetry.io/otel/label"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.temporal.io/sdk/client"
 	temporalClient "go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/workflow"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/keepalive"
 )
 
 var (
@@ -36,12 +31,12 @@ func initialize(cfg config.Configuration) error {
 
 	_tracer = global.Tracer("")
 
-	_eventClient, err = eventGRPCClient(cfg)
+	_eventClient, err = eventGRPC.NewClient(cfg)
 	if err != nil {
 		return err
 	}
 
-	_walletClient, err = walletGRPCClient(cfg)
+	_walletClient, err = walletGRPC.NewClient(cfg)
 	if err != nil {
 		return err
 	}
@@ -53,28 +48,6 @@ func initialize(cfg config.Configuration) error {
 
 	log.Info("frontend server is initialized")
 	return nil
-}
-
-// initTracer creates a new trace provider instance and registers it as global trace provider.
-func initTracer(cfg config.Configuration) func() {
-	// Create and install Jaeger export pipeline
-	flush, err := jaeger.InstallNewPipeline(
-		jaeger.WithCollectorEndpoint(cfg.Jaeger.AdvertiseAddr),
-		jaeger.WithProcess(jaeger.Process{
-			ServiceName: "frontend",
-			Tags: []label.KeyValue{
-				label.String("version", "1.0"),
-			},
-		}),
-		jaeger.WithSDK(&sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
-	)
-	if err != nil {
-		log.Err(err).Fatal("install jaeger pipleline failed.")
-	}
-
-	return func() {
-		flush()
-	}
 }
 
 func initTemporalClient(cfg config.Configuration) (temporalClient.Client, error) {
@@ -92,56 +65,4 @@ func initTemporalClient(cfg config.Configuration) (temporalClient.Client, error)
 		return nil, err
 	}
 	return c, nil
-}
-
-func eventGRPCClient(cfg config.Configuration) (eventProto.EventServiceClient, error) {
-	conn, err := grpc.Dial(cfg.Event.GRPCAdvertiseAddr,
-		grpc.WithInsecure(),
-		grpc.WithKeepaliveParams(keepalive.ClientParameters{
-			Time:                5,
-			Timeout:             5,
-			PermitWithoutStream: true,
-		}),
-		grpc.WithChainUnaryInterceptor(
-			grpctrace.UnaryClientInterceptor(_tracer),
-			frontendGRPC.ClientInterceptor(),
-		),
-		grpc.WithStreamInterceptor(grpctrace.StreamClientInterceptor(_tracer)),
-	)
-
-	if err != nil {
-		log.Errorf("main: dial event grpc server failed: %v, connection string: %s", err, cfg.Event.GRPCAdvertiseAddr)
-		return nil, err
-	}
-
-	log.Infof("main: dail event grpc server %s%s", cfg.Event.GRPCAdvertiseAddr, " connect successfully")
-
-	client := eventProto.NewEventServiceClient(conn)
-	return client, nil
-}
-
-func walletGRPCClient(cfg config.Configuration) (walletProto.WalletServiceClient, error) {
-	conn, err := grpc.Dial(cfg.Wallet.GRPCAdvertiseAddr,
-		grpc.WithInsecure(),
-		grpc.WithKeepaliveParams(keepalive.ClientParameters{
-			Time:                5,
-			Timeout:             5,
-			PermitWithoutStream: true,
-		}),
-		grpc.WithChainUnaryInterceptor(
-			grpctrace.UnaryClientInterceptor(_tracer),
-			frontendGRPC.ClientInterceptor(),
-		),
-		grpc.WithStreamInterceptor(grpctrace.StreamClientInterceptor(_tracer)),
-	)
-
-	if err != nil {
-		log.Errorf("main: dial wallet grpc server failed: %v, connection string: %s", err, cfg.Wallet.GRPCAdvertiseAddr)
-		return nil, err
-	}
-
-	log.Infof("main: dail wallet grpc server %s%s", cfg.Wallet.GRPCAdvertiseAddr, " connect successfully")
-
-	client := walletProto.NewWalletServiceClient(conn)
-	return client, nil
 }

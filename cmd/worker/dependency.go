@@ -3,24 +3,14 @@ package worker
 import (
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
-	frontendGRPC "github.com/jasonsoft/starter/pkg/frontend/delivery/grpc"
+	eventGRPC "github.com/jasonsoft/starter/pkg/event/delivery/grpc"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
+	walletGRPC "github.com/jasonsoft/starter/pkg/wallet/delivery/grpc"
 	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
 	"github.com/jasonsoft/starter/pkg/workflow"
-
-	grpctrace "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc"
-	"go.opentelemetry.io/otel/api/global"
-	"go.opentelemetry.io/otel/api/trace"
-	"go.opentelemetry.io/otel/exporters/trace/jaeger"
-	"go.opentelemetry.io/otel/label"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/keepalive"
 )
 
 var (
-	_tracer trace.Tracer
-
 	// grpc clients
 	_walletClient walletProto.WalletServiceClient
 	_eventClient  eventProto.EventServiceClient
@@ -31,14 +21,12 @@ func initialize(cfg config.Configuration) error {
 
 	cfg.InitLogger("worker")
 
-	_tracer = global.Tracer("")
-
-	_eventClient, err = eventGRPCClient(cfg)
+	_eventClient, err = eventGRPC.NewClient(cfg)
 	if err != nil {
 		return err
 	}
 
-	_walletClient, err = walletGRPCClient(cfg)
+	_walletClient, err = walletGRPC.NewClient(cfg)
 	if err != nil {
 		return err
 	}
@@ -53,78 +41,4 @@ func initialize(cfg config.Configuration) error {
 
 	log.Info("worker server is initialized")
 	return nil
-}
-
-// initTracer creates a new trace provider instance and registers it as global trace provider.
-func initTracer(cfg config.Configuration) func() {
-	// Create and install Jaeger export pipeline
-	flush, err := jaeger.InstallNewPipeline(
-		jaeger.WithCollectorEndpoint(cfg.Jaeger.AdvertiseAddr),
-		jaeger.WithProcess(jaeger.Process{
-			ServiceName: "worker",
-			Tags: []label.KeyValue{
-				label.String("version", "1.0"),
-			},
-		}),
-		jaeger.WithSDK(&sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
-	)
-	if err != nil {
-		log.Err(err).Fatal("install jaeger pipleline failed.")
-	}
-
-	return func() {
-		flush()
-	}
-}
-
-func eventGRPCClient(cfg config.Configuration) (eventProto.EventServiceClient, error) {
-	conn, err := grpc.Dial(cfg.Event.GRPCAdvertiseAddr,
-		grpc.WithInsecure(),
-		grpc.WithKeepaliveParams(keepalive.ClientParameters{
-			Time:                5,
-			Timeout:             5,
-			PermitWithoutStream: true,
-		}),
-		grpc.WithChainUnaryInterceptor(
-			grpctrace.UnaryClientInterceptor(_tracer),
-			frontendGRPC.ClientInterceptor(),
-		),
-		grpc.WithStreamInterceptor(grpctrace.StreamClientInterceptor(_tracer)),
-	)
-
-	if err != nil {
-		log.Errorf("main: dial event grpc server failed: %v, connection string: %s", err, cfg.Event.GRPCAdvertiseAddr)
-		return nil, err
-	}
-
-	log.Infof("main: dail event grpc server %s%s", cfg.Event.GRPCAdvertiseAddr, " connect successfully")
-
-	client := eventProto.NewEventServiceClient(conn)
-	return client, nil
-}
-
-func walletGRPCClient(cfg config.Configuration) (walletProto.WalletServiceClient, error) {
-	conn, err := grpc.Dial(cfg.Wallet.GRPCAdvertiseAddr,
-		grpc.WithInsecure(),
-		grpc.WithKeepaliveParams(keepalive.ClientParameters{
-			Time:                5,
-			Timeout:             5,
-			PermitWithoutStream: true,
-		}),
-		grpc.WithChainUnaryInterceptor(
-			grpctrace.UnaryClientInterceptor(_tracer),
-			frontendGRPC.ClientInterceptor(),
-		),
-		grpc.WithStreamInterceptor(grpctrace.StreamClientInterceptor(_tracer)),
-	)
-
-	if err != nil {
-		log.Errorf("main: dial wallet grpc server failed: %v, connection string: %s", err, cfg.Wallet.GRPCAdvertiseAddr)
-		return nil, err
-	}
-
-	log.Infof("main: dail wallet grpc server %s%s", cfg.Wallet.GRPCAdvertiseAddr, " connect successfully")
-
-	client := walletProto.NewWalletServiceClient(conn)
-	return client, nil
 }

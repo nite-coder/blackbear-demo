@@ -41,7 +41,7 @@ var RunCmd = &cobra.Command{
 		}
 
 		// enable tracer
-		fn := initTracer(cfg)
+		fn := cfg.InitTracer("worker")
 		defer fn()
 		tr := global.Tracer("")
 		bridgeTracer, _ := opentracing.NewTracerPair(tr)
