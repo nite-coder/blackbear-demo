@@ -13,10 +13,11 @@ import (
 	"github.com/jasonsoft/starter/internal/pkg/config"
 	"github.com/jasonsoft/starter/internal/pkg/database"
 	internalDatabase "github.com/jasonsoft/starter/internal/pkg/database"
-	"github.com/jasonsoft/starter/pkg/event"
+
+	"github.com/jasonsoft/starter/pkg/domain"
 	"github.com/jasonsoft/starter/pkg/event/proto"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
-	eventDatabase "github.com/jasonsoft/starter/pkg/event/repository/database"
+	eventDatabase "github.com/jasonsoft/starter/pkg/event/repository/mysql"
 	eventService "github.com/jasonsoft/starter/pkg/event/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -34,10 +35,10 @@ var (
 	_db  *gorm.DB
 	_cfg config.Configuration
 	// repo
-	_eventRepo event.Repository
+	_eventRepo domain.EventRepository
 
 	// services
-	_eventService event.Servicer
+	_eventService domain.EventServicer
 
 	// grpc server
 	_eventServer eventProto.EventServiceServer

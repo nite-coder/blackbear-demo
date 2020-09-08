@@ -2,11 +2,11 @@ package grpc
 
 import (
 	"github.com/golang/protobuf/ptypes"
-	"github.com/jasonsoft/starter/pkg/wallet"
+	"github.com/jasonsoft/starter/pkg/domain"
 	"github.com/jasonsoft/starter/pkg/wallet/proto"
 )
 
-func walletToGRPC(wallet *wallet.Wallet) (*proto.Wallet, error) {
+func walletToGRPC(wallet *domain.Wallet) (*proto.Wallet, error) {
 	if wallet == nil {
 		return nil, nil
 	}

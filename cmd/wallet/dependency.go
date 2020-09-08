@@ -3,14 +3,14 @@ package wallet
 import (
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
-	"github.com/jasonsoft/starter/pkg/wallet"
+	"github.com/jasonsoft/starter/pkg/domain"
 	walletGRPC "github.com/jasonsoft/starter/pkg/wallet/delivery/grpc"
 	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
 	walletService "github.com/jasonsoft/starter/pkg/wallet/service"
 )
 
 var (
-	_walletService wallet.Servicer
+	_walletService domain.WalletServicer
 
 	// grpc server
 	_walletServer walletProto.WalletServiceServer

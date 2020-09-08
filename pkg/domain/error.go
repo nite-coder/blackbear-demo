@@ -1,4 +1,4 @@
-package exception
+package domain
 
 import "google.golang.org/grpc/codes"
 

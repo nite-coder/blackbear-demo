@@ -5,8 +5,8 @@ import (
 	"errors"
 
 	"github.com/jasonsoft/log/v2"
-	"github.com/jasonsoft/starter/internal/pkg/exception"
 	internalMiddleware "github.com/jasonsoft/starter/internal/pkg/middleware"
+	"github.com/jasonsoft/starter/pkg/domain"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -34,7 +34,7 @@ func Interceptor() grpc.UnaryServerInterceptor {
 
 		// centralized error
 		if err != nil {
-			var appErr *exception.AppError
+			var appErr *domain.AppError
 			if errors.As(err, &appErr) {
 				gErr := status.Error(appErr.Status, appErr.Message)
 				return result, gErr

@@ -7,21 +7,21 @@ import (
 
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
-	"github.com/jasonsoft/starter/pkg/wallet"
+	"github.com/jasonsoft/starter/pkg/domain"
 )
 
 // WalletService handles wallet's business logic
 type WalletService struct {
 	mu     sync.Mutex
 	config config.Configuration
-	wallet *wallet.Wallet
+	wallet *domain.Wallet
 }
 
 // NewWalletService create an instance of wallet service
-func NewWalletService(cfg config.Configuration) wallet.Servicer {
+func NewWalletService(cfg config.Configuration) domain.WalletServicer {
 	return &WalletService{
 		config: cfg,
-		wallet: &wallet.Wallet{
+		wallet: &domain.Wallet{
 			ID:        1,
 			Amount:    10000,
 			UpdatedAt: time.Now().UTC(),
@@ -30,7 +30,7 @@ func NewWalletService(cfg config.Configuration) wallet.Servicer {
 }
 
 // Wallet returns a wallet
-func (svc *WalletService) Wallet(ctx context.Context) (*wallet.Wallet, error) {
+func (svc *WalletService) Wallet(ctx context.Context) (*domain.Wallet, error) {
 	logger := log.FromContext(ctx)
 	logger.Debug("begin wallet fn")
 

@@ -1,4 +1,4 @@
-package wallet
+package domain
 
 import (
 	"context"
@@ -12,8 +12,8 @@ type Wallet struct {
 	UpdatedAt time.Time
 }
 
-// Servicer handles wallet's business logic
-type Servicer interface {
+// WalletServicer handles wallet's business logic
+type WalletServicer interface {
 	Wallet(ctx context.Context) (*Wallet, error)
 	Withdraw(ctx context.Context, transID string, amount int64) error
 }

@@ -6,18 +6,18 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
-	"github.com/jasonsoft/starter/pkg/event"
+	"github.com/jasonsoft/starter/pkg/domain"
 	"github.com/jasonsoft/starter/pkg/event/proto"
 )
 
 // EventServer handles all event business logic
 type EventServer struct {
 	config       config.Configuration
-	eventService event.Servicer
+	eventService domain.EventServicer
 }
 
 // NewEventServer create an instance of EventServer
-func NewEventServer(cfg config.Configuration, eventService event.Servicer) proto.EventServiceServer {
+func NewEventServer(cfg config.Configuration, eventService domain.EventServicer) proto.EventServiceServer {
 	return &EventServer{
 		config:       cfg,
 		eventService: eventService,
@@ -29,7 +29,7 @@ func (s *EventServer) GetEvents(ctx context.Context, request *proto.GetEventsReq
 	logger := log.FromContext(ctx)
 	logger.Debug("grpc: begin GetEvent fn")
 
-	events, err := s.eventService.Events(ctx, event.FindEventOptions{
+	events, err := s.eventService.Events(ctx, domain.FindEventOptions{
 		ID:    request.Id,
 		Title: request.Title,
 	})
@@ -51,10 +51,10 @@ func (s *EventServer) GetEvents(ctx context.Context, request *proto.GetEventsReq
 // UpdatePublishStatus update event's publishstatus
 func (s *EventServer) UpdatePublishStatus(ctx context.Context, request *proto.UpdatePublishStatusRequest) (*empty.Empty, error) {
 
-	req := event.UpdateEventStatusRequest{
+	req := domain.UpdateEventStatusRequest{
 		EventID:         request.EventId,
 		TransID:         request.TransId,
-		PublishedStatus: event.PublishedStatus(request.PublishedStatus),
+		PublishedStatus: domain.PublishedStatus(request.PublishedStatus),
 	}
 
 	err := s.eventService.UpdatePublishStatus(ctx, req)

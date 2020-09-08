@@ -7,13 +7,13 @@ import (
 
 	"github.com/99designs/gqlgen/handler"
 	"github.com/jasonsoft/log/v2"
-	"github.com/jasonsoft/starter/internal/pkg/exception"
+	"github.com/jasonsoft/starter/pkg/domain"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"go.temporal.io/sdk/temporal"
 )
 
 var (
-	ErrNotFound = exception.New("NOT_FOUND", "resource was not found")
+	ErrNotFound = domain.New("NOT_FOUND", "resource was not found")
 )
 
 func CentralizedError() handler.Option {
@@ -21,7 +21,7 @@ func CentralizedError() handler.Option {
 		func(ctx context.Context, err error) *gqlerror.Error {
 			logger := log.FromContext(ctx)
 
-			var appErr exception.AppError
+			var appErr domain.AppError
 			if errors.As(err, &appErr) {
 				gErr := &gqlerror.Error{
 					Message: appErr.Error(),

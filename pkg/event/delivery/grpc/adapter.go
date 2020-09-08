@@ -2,11 +2,11 @@ package grpc
 
 import (
 	"github.com/golang/protobuf/ptypes"
-	"github.com/jasonsoft/starter/pkg/event"
+	"github.com/jasonsoft/starter/pkg/domain"
 	"github.com/jasonsoft/starter/pkg/event/proto"
 )
 
-func eventToGRPC(event *event.Event) (*proto.Event, error) {
+func eventToGRPC(event *domain.Event) (*proto.Event, error) {
 	if event == nil {
 		return nil, nil
 	}
@@ -32,7 +32,7 @@ func eventToGRPC(event *event.Event) (*proto.Event, error) {
 	return &result, nil
 }
 
-func eventsToGRPC(events []event.Event) ([]*proto.Event, error) {
+func eventsToGRPC(events []domain.Event) ([]*proto.Event, error) {
 	result := []*proto.Event{}
 
 	for _, evt := range events {

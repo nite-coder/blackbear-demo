@@ -1,10 +1,9 @@
-package event
+package domain
 
 import (
 	"context"
 	"time"
 
-	"github.com/jasonsoft/starter/internal/pkg/exception"
 	"google.golang.org/grpc/codes"
 	"gorm.io/gorm"
 )
@@ -21,7 +20,7 @@ const (
 
 var (
 	// ErrNotFound means resource not found
-	ErrNotFound = &exception.AppError{Code: "NOT_FOUND", Message: "resource was not found or status was wrong", Status: codes.NotFound}
+	ErrNotFound = &AppError{Code: "NOT_FOUND", Message: "resource was not found or status was wrong", Status: codes.NotFound}
 )
 
 // Event is Event
@@ -58,14 +57,14 @@ func (f *FindEventOptions) TableName() string {
 	return "events"
 }
 
-// Servicer handles event's business logic
-type Servicer interface {
+// EventServicer handles event's business logic
+type EventServicer interface {
 	Events(ctx context.Context, opts FindEventOptions) ([]Event, error)
 	UpdatePublishStatus(ctx context.Context, request UpdateEventStatusRequest) error
 }
 
-// Repository handles event's database operations
-type Repository interface {
+// EventRepository handles event's database operations
+type EventRepository interface {
 	Events(ctx context.Context, opts FindEventOptions, tx ...*gorm.DB) ([]Event, error)
 	UpdatePublishStatus(ctx context.Context, request UpdateEventStatusRequest, tx ...*gorm.DB) error
 }

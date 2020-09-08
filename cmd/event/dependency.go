@@ -4,19 +4,19 @@ import (
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
 	"github.com/jasonsoft/starter/internal/pkg/database"
-	"github.com/jasonsoft/starter/pkg/event"
+	"github.com/jasonsoft/starter/pkg/domain"
 	eventGRPC "github.com/jasonsoft/starter/pkg/event/delivery/grpc"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
-	eventDatabase "github.com/jasonsoft/starter/pkg/event/repository/database"
+	eventDatabase "github.com/jasonsoft/starter/pkg/event/repository/mysql"
 	eventService "github.com/jasonsoft/starter/pkg/event/service"
 )
 
 var (
 	// repo
-	_eventRepo event.Repository
+	_eventRepo domain.EventRepository
 
 	// services
-	_eventService event.Servicer
+	_eventService domain.EventServicer
 
 	// grpc server
 	_eventServer eventProto.EventServiceServer

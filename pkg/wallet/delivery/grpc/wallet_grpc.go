@@ -6,18 +6,18 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
-	"github.com/jasonsoft/starter/pkg/wallet"
+	"github.com/jasonsoft/starter/pkg/domain"
 	"github.com/jasonsoft/starter/pkg/wallet/proto"
 )
 
 // WalletServer is grpc server for wallet
 type WalletServer struct {
 	config        config.Configuration
-	walletService wallet.Servicer
+	walletService domain.WalletServicer
 }
 
 // NewWalletServer return a WalletServer instance
-func NewWalletServer(cfg config.Configuration, walletService wallet.Servicer) *WalletServer {
+func NewWalletServer(cfg config.Configuration, walletService domain.WalletServicer) *WalletServer {
 	return &WalletServer{
 		config:        cfg,
 		walletService: walletService,
