@@ -12,8 +12,8 @@ type Wallet struct {
 	UpdatedAt time.Time
 }
 
-// WalletServicer handles wallet's business logic
-type WalletServicer interface {
+// WalletUsecase represents the wallet's usecases
+type WalletUsecase interface {
 	Wallet(ctx context.Context) (*Wallet, error)
 	Withdraw(ctx context.Context, transID string, amount int64) error
 }

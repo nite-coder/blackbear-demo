@@ -10,22 +10,21 @@ import (
 	"github.com/jasonsoft/starter/pkg/event/proto"
 )
 
-// EventServer handles all event business logic
-type EventServer struct {
+type eventServer struct {
 	config       config.Configuration
-	eventService domain.EventServicer
+	eventService domain.EventUsecase
 }
 
 // NewEventServer create an instance of EventServer
-func NewEventServer(cfg config.Configuration, eventService domain.EventServicer) proto.EventServiceServer {
-	return &EventServer{
+func NewEventServer(cfg config.Configuration, eventService domain.EventUsecase) proto.EventServiceServer {
+	return &eventServer{
 		config:       cfg,
 		eventService: eventService,
 	}
 }
 
 // GetEvents returns all events
-func (s *EventServer) GetEvents(ctx context.Context, request *proto.GetEventsRequest) (*proto.GetEventsResponse, error) {
+func (s *eventServer) GetEvents(ctx context.Context, request *proto.GetEventsRequest) (*proto.GetEventsResponse, error) {
 	logger := log.FromContext(ctx)
 	logger.Debug("grpc: begin GetEvent fn")
 
@@ -49,7 +48,7 @@ func (s *EventServer) GetEvents(ctx context.Context, request *proto.GetEventsReq
 }
 
 // UpdatePublishStatus update event's publishstatus
-func (s *EventServer) UpdatePublishStatus(ctx context.Context, request *proto.UpdatePublishStatusRequest) (*empty.Empty, error) {
+func (s *eventServer) UpdatePublishStatus(ctx context.Context, request *proto.UpdatePublishStatusRequest) (*empty.Empty, error) {
 
 	req := domain.UpdateEventStatusRequest{
 		EventID:         request.EventId,

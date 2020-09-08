@@ -6,11 +6,11 @@ import (
 	"github.com/jasonsoft/starter/pkg/domain"
 	walletGRPC "github.com/jasonsoft/starter/pkg/wallet/delivery/grpc"
 	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
-	walletService "github.com/jasonsoft/starter/pkg/wallet/service"
+	walletUsecase "github.com/jasonsoft/starter/pkg/wallet/usecase"
 )
 
 var (
-	_walletService domain.WalletServicer
+	_walletService domain.WalletUsecase
 
 	// grpc server
 	_walletServer walletProto.WalletServiceServer
@@ -19,7 +19,7 @@ var (
 func initialize(cfg config.Configuration) error {
 	cfg.InitLogger("wallet")
 
-	_walletService = walletService.NewWalletService(cfg)
+	_walletService = walletUsecase.NewWalletUsecase(cfg)
 
 	_walletServer = walletGRPC.NewWalletServer(cfg, _walletService)
 

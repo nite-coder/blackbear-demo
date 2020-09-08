@@ -8,7 +8,7 @@ import (
 	eventGRPC "github.com/jasonsoft/starter/pkg/event/delivery/grpc"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
 	eventDatabase "github.com/jasonsoft/starter/pkg/event/repository/mysql"
-	eventService "github.com/jasonsoft/starter/pkg/event/service"
+	eventUsecase "github.com/jasonsoft/starter/pkg/event/usecase"
 )
 
 var (
@@ -16,7 +16,7 @@ var (
 	_eventRepo domain.EventRepository
 
 	// services
-	_eventService domain.EventServicer
+	_eventService domain.EventUsecase
 
 	// grpc server
 	_eventServer eventProto.EventServiceServer
@@ -34,7 +34,7 @@ func initialize(cfg config.Configuration) error {
 	_eventRepo = eventDatabase.NewEventRepository(cfg, db)
 
 	// services
-	_eventService = eventService.NewEventService(cfg, _eventRepo)
+	_eventService = eventUsecase.NewEventUsecase(cfg, _eventRepo)
 
 	// grpc server
 	_eventServer = eventGRPC.NewEventServer(cfg, _eventService)

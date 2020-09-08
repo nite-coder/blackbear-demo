@@ -1,4 +1,4 @@
-package service
+package usecase
 
 // func TestGetEvents(t *testing.T) {
 // 	ctx := context.Background()

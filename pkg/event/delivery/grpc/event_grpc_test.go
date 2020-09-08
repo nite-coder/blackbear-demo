@@ -18,7 +18,7 @@ import (
 	"github.com/jasonsoft/starter/pkg/event/proto"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
 	eventDatabase "github.com/jasonsoft/starter/pkg/event/repository/mysql"
-	eventService "github.com/jasonsoft/starter/pkg/event/service"
+	eventUsecase "github.com/jasonsoft/starter/pkg/event/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
@@ -38,7 +38,7 @@ var (
 	_eventRepo domain.EventRepository
 
 	// services
-	_eventService domain.EventServicer
+	_eventService domain.EventUsecase
 
 	// grpc server
 	_eventServer eventProto.EventServiceServer
@@ -69,7 +69,7 @@ func TestMain(m *testing.M) {
 	_eventRepo := eventDatabase.NewEventRepository(_cfg, _db)
 
 	// services
-	_eventService := eventService.NewEventService(_cfg, _eventRepo)
+	_eventService := eventUsecase.NewEventUsecase(_cfg, _eventRepo)
 
 	// grpc server
 	grpcServer := grpc.NewServer(

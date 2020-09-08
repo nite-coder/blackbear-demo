@@ -57,13 +57,13 @@ func (f *FindEventOptions) TableName() string {
 	return "events"
 }
 
-// EventServicer handles event's business logic
-type EventServicer interface {
+// EventUsecase represents the wallet's usecases
+type EventUsecase interface {
 	Events(ctx context.Context, opts FindEventOptions) ([]Event, error)
 	UpdatePublishStatus(ctx context.Context, request UpdateEventStatusRequest) error
 }
 
-// EventRepository handles event's database operations
+// EventRepository represents the event's repository contract
 type EventRepository interface {
 	Events(ctx context.Context, opts FindEventOptions, tx ...*gorm.DB) ([]Event, error)
 	UpdatePublishStatus(ctx context.Context, request UpdateEventStatusRequest, tx ...*gorm.DB) error

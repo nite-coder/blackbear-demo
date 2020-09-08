@@ -1,4 +1,4 @@
-package service
+package usecase
 
 import (
 	"context"
@@ -10,16 +10,15 @@ import (
 	"github.com/jasonsoft/starter/pkg/domain"
 )
 
-// WalletService handles wallet's business logic
-type WalletService struct {
+type walletUsecase struct {
 	mu     sync.Mutex
 	config config.Configuration
 	wallet *domain.Wallet
 }
 
-// NewWalletService create an instance of wallet service
-func NewWalletService(cfg config.Configuration) domain.WalletServicer {
-	return &WalletService{
+// NewWalletUsecase create a new walletUsecase object representation of domain.WalletUsecase interface
+func NewWalletUsecase(cfg config.Configuration) domain.WalletUsecase {
+	return &walletUsecase{
 		config: cfg,
 		wallet: &domain.Wallet{
 			ID:        1,
@@ -30,23 +29,23 @@ func NewWalletService(cfg config.Configuration) domain.WalletServicer {
 }
 
 // Wallet returns a wallet
-func (svc *WalletService) Wallet(ctx context.Context) (*domain.Wallet, error) {
+func (u *walletUsecase) Wallet(ctx context.Context) (*domain.Wallet, error) {
 	logger := log.FromContext(ctx)
 	logger.Debug("begin wallet fn")
 
-	return svc.wallet, nil
+	return u.wallet, nil
 }
 
 // Withdraw fn remove amount from wallet
-func (svc *WalletService) Withdraw(ctx context.Context, transID string, amount int64) error {
+func (u *walletUsecase) Withdraw(ctx context.Context, transID string, amount int64) error {
 	logger := log.FromContext(ctx)
 	logger.Debug("begin withdraw fn")
 
-	svc.mu.Lock()
-	defer svc.mu.Unlock()
+	u.mu.Lock()
+	defer u.mu.Unlock()
 
-	svc.wallet.Amount -= amount
-	svc.wallet.UpdatedAt = time.Now().UTC()
+	u.wallet.Amount -= amount
+	u.wallet.UpdatedAt = time.Now().UTC()
 
 	return nil
 }

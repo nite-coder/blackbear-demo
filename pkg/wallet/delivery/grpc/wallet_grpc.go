@@ -13,11 +13,11 @@ import (
 // WalletServer is grpc server for wallet
 type WalletServer struct {
 	config        config.Configuration
-	walletService domain.WalletServicer
+	walletService domain.WalletUsecase
 }
 
 // NewWalletServer return a WalletServer instance
-func NewWalletServer(cfg config.Configuration, walletService domain.WalletServicer) *WalletServer {
+func NewWalletServer(cfg config.Configuration, walletService domain.WalletUsecase) *WalletServer {
 	return &WalletServer{
 		config:        cfg,
 		walletService: walletService,
