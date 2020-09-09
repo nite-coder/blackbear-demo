@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/jasonsoft/log/v2"
@@ -66,6 +67,22 @@ var RunCmd = &cobra.Command{
 		w.RegisterWorkflow(starterWorkflow.PublishEventWorkflow)
 		w.RegisterActivity(starterWorkflow.WithdrawActivity)
 		w.RegisterActivity(starterWorkflow.PublishEventActivity)
+
+		w.RegisterWorkflow(starterWorkflow.CronWorkflow)
+		w.RegisterActivity(starterWorkflow.CronActivity)
+
+		workflowOptions := client.StartWorkflowOptions{
+			ID:           "cron_workflowID",
+			TaskQueue:    "default",
+			CronSchedule: "* * * * *",
+		}
+
+		we, err := c.ExecuteWorkflow(context.Background(), workflowOptions, starterWorkflow.CronWorkflow)
+		if err != nil {
+			panic(err)
+		}
+
+		log.Infof("Started workflow. WorkflowID: %s, RunID: %s", we.GetID(), we.GetRunID())
 
 		err = w.Run(worker.InterruptCh())
 		if err != nil {

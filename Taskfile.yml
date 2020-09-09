@@ -22,7 +22,7 @@ tasks:
   run:
     cmds:
       - task: build
-      - docker-compose up
+      - docker-compose up --scale worker=2
 
 
   infra:
