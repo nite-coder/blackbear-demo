@@ -18,12 +18,12 @@ require (
 	go.opentelemetry.io/otel/bridge/opentracing v0.11.0
 	go.opentelemetry.io/otel/exporters/trace/jaeger v0.11.0
 	go.opentelemetry.io/otel/sdk v0.11.0
-	go.temporal.io/api v0.29.0
-	go.temporal.io/sdk v0.29.0
-	golang.org/x/net v0.0.0-20200813134508-3edf25e44fcc
-	google.golang.org/grpc v1.31.1
+	go.temporal.io/api v0.30.0
+	go.temporal.io/sdk v0.30.0
+	golang.org/x/net v0.0.0-20200822124328-c89045814202
+	google.golang.org/grpc v1.32.0
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/yaml.v2 v2.3.0
 	gorm.io/driver/mysql v1.0.1
-	gorm.io/gorm v1.20.0
+	gorm.io/gorm v1.20.1
 )
