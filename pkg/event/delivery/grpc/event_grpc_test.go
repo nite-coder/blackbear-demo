@@ -69,7 +69,7 @@ func TestMain(m *testing.M) {
 	_eventRepo := eventDatabase.NewEventRepository(_cfg, _db)
 
 	// services
-	_eventService := eventUsecase.NewEventUsecase(_cfg, _eventRepo)
+	_eventService := eventUsecase.NewEventUsecase(_cfg, _db, _eventRepo)
 
 	// grpc server
 	grpcServer := grpc.NewServer(
@@ -161,5 +161,5 @@ func TestUpdatePublishStatus(t *testing.T) {
 	assert.Equal(t, proto.PublishedStatus_PublishedStatus_Published, evt.PublishedStatus)
 
 	_, err = _eventClient.UpdatePublishStatus(ctx, &request)
-	assert.EqualError(t, err, "rpc error: code = NotFound desc = resource was not found or status was wrong")
+	assert.EqualError(t, err, "rpc error: code = Internal desc = status of resource is wrong")
 }

@@ -5,18 +5,22 @@ import (
 
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/starter/internal/pkg/config"
+	"github.com/jasonsoft/starter/internal/pkg/database"
 	"github.com/jasonsoft/starter/pkg/domain"
+	"gorm.io/gorm"
 )
 
 type eventUsecase struct {
 	config config.Configuration
+	db     *gorm.DB
 	repo   domain.EventRepository
 }
 
 // NewEventUsecase create a new eventUsecase object representation of domain.eventUsecase interface
-func NewEventUsecase(cfg config.Configuration, repo domain.EventRepository) domain.EventUsecase {
+func NewEventUsecase(cfg config.Configuration, db *gorm.DB, repo domain.EventRepository) domain.EventUsecase {
 	return &eventUsecase{
 		config: cfg,
+		db:     db,
 		repo:   repo,
 	}
 }
@@ -31,5 +35,25 @@ func (u *eventUsecase) UpdatePublishStatus(ctx context.Context, request domain.U
 	logger := log.FromContext(ctx)
 	logger.Debug("service: begin UpdatePublishStatus fn")
 
-	return u.repo.UpdatePublishStatus(ctx, request)
+	err := database.ExecuteTx(ctx, u.db, func(tx *gorm.DB) error {
+		eventRepo := u.repo.WithTX(tx)
+
+		event, err := eventRepo.Event(ctx, request.EventID)
+		if err != nil {
+			return err
+		}
+
+		if event.PublishedStatus == domain.Published {
+			return domain.ErrWrongStatus
+		}
+
+		request.Version = event.Version
+		return eventRepo.UpdatePublishStatus(ctx, request)
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

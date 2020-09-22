@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"google.golang.org/grpc/codes"
 	"gorm.io/gorm"
 )
 
@@ -18,17 +17,13 @@ const (
 	Published PublishedStatus = 2
 )
 
-var (
-	// ErrNotFound means resource not found
-	ErrNotFound = &AppError{Code: "NOT_FOUND", Message: "resource was not found or status was wrong", Status: codes.NotFound}
-)
-
 // Event is Event
 type Event struct {
 	ID              int64           `gorm:"column:id;primary_key" json:"id"`
 	Title           string          `gorm:"column:title" json:"title"`
 	Description     string          `gorm:"column:description" json:"description"`
 	PublishedStatus PublishedStatus `gorm:"column:published_status" json:"published_status"`
+	Version         int64           `gorm:"column:version" json:"version"`
 	CreatedAt       time.Time       `gorm:"column:created_at" json:"created_at"`
 	UpdatedAt       time.Time       `gorm:"column:updated_at" json:"updated_at"`
 }
@@ -43,6 +38,7 @@ type UpdateEventStatusRequest struct {
 	EventID         int64
 	TransID         string
 	PublishedStatus PublishedStatus
+	Version         int64
 }
 
 // FindEventOptions is a query condition for finding events
@@ -65,6 +61,8 @@ type EventUsecase interface {
 
 // EventRepository represents the event's repository contract
 type EventRepository interface {
-	Events(ctx context.Context, opts FindEventOptions, tx ...*gorm.DB) ([]Event, error)
-	UpdatePublishStatus(ctx context.Context, request UpdateEventStatusRequest, tx ...*gorm.DB) error
+	WithTX(tx *gorm.DB) EventRepository
+	Event(ctx context.Context, id int64) (Event, error)
+	Events(ctx context.Context, opts FindEventOptions) ([]Event, error)
+	UpdatePublishStatus(ctx context.Context, request UpdateEventStatusRequest) error
 }

@@ -34,7 +34,7 @@ func initialize(cfg config.Configuration) error {
 	_eventRepo = eventDatabase.NewEventRepository(cfg, db)
 
 	// services
-	_eventService = eventUsecase.NewEventUsecase(cfg, _eventRepo)
+	_eventService = eventUsecase.NewEventUsecase(cfg, db, _eventRepo)
 
 	// grpc server
 	_eventServer = eventGRPC.NewEventServer(cfg, _eventService)

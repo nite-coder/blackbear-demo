@@ -10,6 +10,7 @@ CREATE TABLE `events`  (
   `title` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `description` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `published_status` tinyint(4) NOT NULL,
+  `version` bigint(0) UNSIGNED NOT NULL,
   `created_at` datetime(3) NOT NULL,
   `updated_at` datetime(3) NOT NULL,
   PRIMARY KEY (`id`) USING BTREE,
