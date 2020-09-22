@@ -3,7 +3,7 @@ module github.com/jasonsoft/starter
 go 1.14
 
 require (
-	github.com/99designs/gqlgen v0.12.2
+	github.com/99designs/gqlgen v0.13.0
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/golang-migrate/migrate/v4 v4.12.2
 	github.com/golang/protobuf v1.4.2
@@ -12,7 +12,7 @@ require (
 	github.com/jasonsoft/napnap v1.1.0
 	github.com/spf13/cobra v1.0.0
 	github.com/stretchr/testify v1.6.1
-	github.com/vektah/gqlparser/v2 v2.0.1
+	github.com/vektah/gqlparser/v2 v2.1.0
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc v0.11.0
 	go.opentelemetry.io/otel v0.11.0
 	go.opentelemetry.io/otel/bridge/opentracing v0.11.0
