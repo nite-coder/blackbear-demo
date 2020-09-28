@@ -18,7 +18,7 @@ func NewTracerMW() *TracerMW {
 func (m *TracerMW) Invoke(c *napnap.Context, next napnap.HandlerFunc) {
 	tr := global.Tracer("")
 
-	ctx, span := tr.Start(c.StdContext(), "web")
+	ctx, span := tr.Start(c.StdContext(), "web") // TODO: we need to replace "web" to gql operation's name which is more meaningful
 	c.SetStdContext(ctx)
 	span.SetAttribute("request_id", RequestIDFromContext(ctx))
 	defer span.End()

@@ -5,7 +5,7 @@ import (
 	"github.com/jasonsoft/starter/internal/pkg/config"
 	internalGRPC "github.com/jasonsoft/starter/internal/pkg/grpc"
 	"github.com/jasonsoft/starter/pkg/event/proto"
-	grpctrace "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc"
+	grpctrace "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel/api/global"
 
 	"google.golang.org/grpc"
