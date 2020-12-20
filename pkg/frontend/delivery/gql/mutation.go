@@ -6,7 +6,7 @@ import (
 	"github.com/jasonsoft/log/v2"
 	internalMiddleware "github.com/jasonsoft/starter/internal/pkg/middleware"
 	starterWorkflow "github.com/jasonsoft/starter/pkg/workflow"
-	"go.opentelemetry.io/otel/api/global"
+	"go.opentelemetry.io/otel"
 	"go.temporal.io/sdk/client"
 )
 
@@ -21,7 +21,7 @@ func (r *mutationResolver) PublishEvent(ctx context.Context, input PublishEventI
 
 	ctx = context.WithValue(ctx, starterWorkflow.PropagateKey, &starterWorkflow.Values{Key: "request_id", Value: internalMiddleware.RequestIDFromContext(ctx)})
 
-	tr := global.Tracer("")
+	tr := otel.Tracer("")
 	_, span := tr.Start(ctx, "StartWorkflow-PublishEventWorkflow-me")
 	defer span.End()
 

@@ -9,8 +9,10 @@ import (
 	"github.com/jasonsoft/log/v2"
 	"github.com/jasonsoft/log/v2/handlers/console"
 	"github.com/jasonsoft/log/v2/handlers/gelf"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/trace/jaeger"
 	"go.opentelemetry.io/otel/label"
+	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"gopkg.in/yaml.v2"
 )
@@ -148,7 +150,7 @@ func (cfg Configuration) InitTracer(appID string) func() {
 	if err != nil {
 		log.Err(err).Fatal("install jaeger pipleline failed.")
 	}
-
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
 	return func() {
 		flush()
 	}

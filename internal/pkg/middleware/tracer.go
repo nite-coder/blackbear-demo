@@ -2,7 +2,8 @@ package middleware
 
 import (
 	"github.com/jasonsoft/napnap"
-	"go.opentelemetry.io/otel/api/global"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/label"
 )
 
 // TracerMW is tracer middleware struct
@@ -16,11 +17,17 @@ func NewTracerMW() *TracerMW {
 
 // Invoke function is a middleware entry
 func (m *TracerMW) Invoke(c *napnap.Context, next napnap.HandlerFunc) {
-	tr := global.Tracer("")
+	tr := otel.Tracer("")
 
 	ctx, span := tr.Start(c.StdContext(), "web") // TODO: we need to replace "web" to gql operation's name which is more meaningful
 	c.SetStdContext(ctx)
-	span.SetAttribute("request_id", RequestIDFromContext(ctx))
+
+	lblRequestID := label.KeyValue{
+		Key:   label.Key("request_id"),
+		Value: label.StringValue(RequestIDFromContext(ctx)),
+	}
+
+	span.SetAttributes(lblRequestID)
 	defer span.End()
 
 	next(c)

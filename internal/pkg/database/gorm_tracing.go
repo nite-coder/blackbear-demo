@@ -2,9 +2,9 @@ package database
 
 import (
 	internalMiddleware "github.com/jasonsoft/starter/internal/pkg/middleware"
-	"go.opentelemetry.io/otel/api/global"
-	"go.opentelemetry.io/otel/api/trace"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/label"
+	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 )
 
@@ -15,9 +15,15 @@ const (
 )
 
 func before(db *gorm.DB) {
-	tr := global.Tracer("")
+	tr := otel.Tracer("")
 	ctx, span := tr.Start(db.Statement.Context, "gorm")
-	span.SetAttribute("request_id", internalMiddleware.RequestIDFromContext(ctx))
+
+	lblRequestID := label.KeyValue{
+		Key:   label.Key("request_id"),
+		Value: label.StringValue(internalMiddleware.RequestIDFromContext(ctx)),
+	}
+
+	span.SetAttributes(lblRequestID)
 	db.Statement.Context = ctx
 
 	db.InstanceSet(gormSpanKey, span)
@@ -29,7 +35,6 @@ func after(db *gorm.DB) {
 	if !isExist {
 		return
 	}
-	ctx := db.Statement.Context
 
 	span, ok := _span.(trace.Span)
 	if !ok {
@@ -39,11 +44,21 @@ func after(db *gorm.DB) {
 
 	// Error
 	if db.Error != nil {
-		span.AddEvent(ctx, "error", label.String("err", db.Error.Error()))
+		lblError := label.KeyValue{
+			Key:   label.Key("error"),
+			Value: label.StringValue(db.Error.Error()),
+		}
+		evt := trace.WithAttributes(lblError)
+		span.AddEvent("error", evt)
+
 	}
 
 	// sql
-	span.SetAttribute("sql", db.Dialector.Explain(db.Statement.SQL.String(), db.Statement.Vars...))
+	lblSQL := label.KeyValue{
+		Key:   label.Key("sql"),
+		Value: label.StringValue(db.Dialector.Explain(db.Statement.SQL.String(), db.Statement.Vars...)),
+	}
+	span.SetAttributes(lblSQL)
 
 	return
 }

@@ -8,9 +8,10 @@ import (
 	walletGRPC "github.com/jasonsoft/starter/pkg/wallet/delivery/grpc"
 	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
 	starterWorkflow "github.com/jasonsoft/starter/pkg/workflow"
-	"go.opentelemetry.io/otel/api/global"
-	"go.opentelemetry.io/otel/api/trace"
+	"go.opentelemetry.io/otel"
+
 	"go.opentelemetry.io/otel/bridge/opentracing"
+	"go.opentelemetry.io/otel/trace"
 	"go.temporal.io/sdk/client"
 	temporalClient "go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/workflow"
@@ -29,7 +30,7 @@ func initialize(cfg config.Configuration) error {
 
 	cfg.InitLogger("frontend")
 
-	_tracer = global.Tracer("")
+	_tracer = otel.Tracer("")
 
 	_eventClient, err = eventGRPC.NewClient(cfg)
 	if err != nil {

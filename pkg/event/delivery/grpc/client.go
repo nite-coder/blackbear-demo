@@ -5,15 +5,13 @@ import (
 	"github.com/jasonsoft/starter/internal/pkg/config"
 	internalGRPC "github.com/jasonsoft/starter/internal/pkg/grpc"
 	"github.com/jasonsoft/starter/pkg/event/proto"
-	grpctrace "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-	"go.opentelemetry.io/otel/api/global"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 )
 
 func NewClient(cfg config.Configuration) (proto.EventServiceClient, error) {
-	tracer := global.Tracer("")
 
 	conn, err := grpc.Dial(cfg.Event.GRPCAdvertiseAddr,
 		grpc.WithInsecure(),
@@ -23,10 +21,10 @@ func NewClient(cfg config.Configuration) (proto.EventServiceClient, error) {
 			PermitWithoutStream: true,
 		}),
 		grpc.WithChainUnaryInterceptor(
-			grpctrace.UnaryClientInterceptor(tracer),
+			otelgrpc.UnaryClientInterceptor(),
 			internalGRPC.ClientInterceptor(),
 		),
-		grpc.WithStreamInterceptor(grpctrace.StreamClientInterceptor(tracer)),
+		grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()),
 	)
 
 	if err != nil {

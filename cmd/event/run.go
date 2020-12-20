@@ -13,8 +13,8 @@ import (
 	eventGRPC "github.com/jasonsoft/starter/pkg/event/delivery/grpc"
 	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
 	"github.com/spf13/cobra"
-	grpctrace "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-	"go.opentelemetry.io/otel/api/global"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 )
@@ -53,7 +53,6 @@ var RunCmd = &cobra.Command{
 		// enable tracer
 		fn := cfg.InitTracer("event")
 		defer fn()
-		tracer := global.Tracer("")
 
 		// start grpc servers
 		lis, err := net.Listen("tcp", cfg.Event.GRPCBind)
@@ -75,10 +74,10 @@ var RunCmd = &cobra.Command{
 				},
 			),
 			grpc.ChainUnaryInterceptor(
-				grpctrace.UnaryServerInterceptor(tracer),
+				otelgrpc.UnaryServerInterceptor(),
 				eventGRPC.Interceptor(),
 			),
-			grpc.StreamInterceptor(grpctrace.StreamServerInterceptor(tracer)),
+			grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()),
 		)
 		eventProto.RegisterEventServiceServer(grpcServer, _eventServer)
 		log.Infof("event grpc service listen on %s", cfg.Event.GRPCBind)

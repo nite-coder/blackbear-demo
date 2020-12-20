@@ -8,7 +8,7 @@ import (
 	"github.com/jasonsoft/starter/internal/pkg/config"
 	starterWorkflow "github.com/jasonsoft/starter/pkg/workflow"
 	"github.com/spf13/cobra"
-	"go.opentelemetry.io/otel/api/global"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/bridge/opentracing"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
@@ -44,7 +44,8 @@ var RunCmd = &cobra.Command{
 		// enable tracer
 		fn := cfg.InitTracer("worker")
 		defer fn()
-		tr := global.Tracer("")
+
+		tr := otel.Tracer("")
 		bridgeTracer, _ := opentracing.NewTracerPair(tr)
 
 		// start worker, one worker per process mode

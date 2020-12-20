@@ -13,8 +13,7 @@ import (
 	walletGRPC "github.com/jasonsoft/starter/pkg/wallet/delivery/grpc"
 	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
 	"github.com/spf13/cobra"
-	grpctrace "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-	"go.opentelemetry.io/otel/api/global"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 )
@@ -53,7 +52,6 @@ var RunCmd = &cobra.Command{
 		// enable tracer
 		fn := cfg.InitTracer("wallet")
 		defer fn()
-		tracer := global.Tracer("")
 
 		// start grpc servers
 		lis, err := net.Listen("tcp", cfg.Wallet.GRPCBind)
@@ -75,10 +73,10 @@ var RunCmd = &cobra.Command{
 				},
 			),
 			grpc.ChainUnaryInterceptor(
-				grpctrace.UnaryServerInterceptor(tracer),
+				otelgrpc.UnaryServerInterceptor(),
 				walletGRPC.Interceptor(),
 			),
-			grpc.StreamInterceptor(grpctrace.StreamServerInterceptor(tracer)),
+			grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()),
 		)
 		walletProto.RegisterWalletServiceServer(grpcServer, _walletServer)
 		log.Infof("wallet grpc service listen on %s", cfg.Wallet.GRPCBind)
