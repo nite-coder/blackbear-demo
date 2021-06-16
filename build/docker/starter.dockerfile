@@ -10,10 +10,10 @@ COPY . .
 WORKDIR /starter/cmd
 RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o starter
 
-FROM alpine:3.12.0
+FROM alpine:3.12
 RUN apk update && \
     apk upgrade && \
-    apk add --no-cache curl tzdata ca-certificates && \
+    apk add --no-cache curl tzdata ca-certificates bash nano && \
     rm -rf /var/cache/apk/*
 
 WORKDIR /starter
