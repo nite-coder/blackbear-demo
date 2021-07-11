@@ -15,7 +15,7 @@ lint:
 	golangci-lint run ./... -v
 
 lint.docker:
-	docker run --rm -v ${pwd}:/app -w /app golangci/golangci-lint:v1.41-alpine golangci-lint run 
+	docker run --rm -v ${LOCAL_WORKSPACE_FOLDER}:/app -w /app golangci/golangci-lint:v1.41-alpine golangci-lint run ./... -v
 
 infra:
 	- docker-compose -f docker-compose-infra.yml up -d
