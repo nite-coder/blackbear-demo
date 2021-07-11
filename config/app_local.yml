@@ -1,0 +1,32 @@
+env: local
+mode: debug
+databases:
+  - name: starter_db
+    type: mysql
+    connection_string: root:root@tcp(mysql:3306)/starter_db?charset=utf8&parseTime=true&multiStatements=true&timeout=60s
+    is_migrated: true
+redis:
+  cluster_mode: false
+  addresses:
+    - "redis:6379"
+  password:
+  max_retries: 1
+  pool_size_per_node: 2
+  db: 1
+temporal:
+  address: "temporal:7233"
+jaeger:
+  advertise_addr: http://jaeger-all-in-one:14268/api/traces
+logs:
+  - name: clog
+    type: console
+    min_level: debug
+frontend:
+  http_bind: ":10080"
+  http_advertise_addr: "frontend:10080"
+event:
+  grpc_bind: ":10010"
+  grpc_advertise_addr: "event:10010"
+wallet:
+  grpc_bind: ":10020"
+  grpc_advertise_addr: "wallet:10020"

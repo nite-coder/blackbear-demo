@@ -1,0 +1,6 @@
+
+type Wallet {
+  id: Int!
+  amount: Int!
+  updatedAt: Time!
+}

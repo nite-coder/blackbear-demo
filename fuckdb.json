@@ -1,0 +1,16 @@
+{
+  "db": {
+    "host": "localhost",
+    "port": 3306,
+    "password": "root",
+    "user": "root",
+    "table": "events",
+    "database": "starter_db",
+    "packageName": "database",
+    "structName": "Event",
+    "structSorted": false,
+    "jsonAnnotation": true,
+    "xmlAnnotation": false,
+    "gormAnnotation": true
+      }
+}

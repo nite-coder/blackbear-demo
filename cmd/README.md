@@ -1,0 +1,1 @@
+go build -o starter.exe && starter frontend

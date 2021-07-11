@@ -1,0 +1,58 @@
+# https://taskfile.dev
+
+version: '3'
+
+env:
+  COMPOSE_DOCKER_CLI_BUILD: 1
+  DOCKER_BUILDKIT: 1
+
+tasks:
+  lint:
+    cmds:
+      - docker run -v  ${PWD}:/data cytopia/golint:latest ./...
+
+  build:
+    cmds:
+      - docker build --rm --file=./build/docker/starter.dockerfile --tag jasonsoft/starter:latest .
+
+  test:
+    cmds: 
+      - go test -v ./...
+
+  run:
+    cmds:
+      - task: build
+      - docker-compose up --scale worker=1
+
+
+  infra:
+    cmds:
+      - docker-compose -f docker-compose-infra.yml up -d
+
+  infra-down:
+    cmds:
+      - docker-compose -f docker-compose-infra.yml down
+      
+  proto:
+    cmds:
+      - protoc --proto_path=. --go_out=plugins=grpc:. ./pkg/event/proto/*.proto
+      - protoc --proto_path=. --go_out=plugins=grpc:. ./pkg/wallet/proto/*.proto
+
+  gql:
+    dir: pkg/frontend/delivery/gql/
+    cmds:
+      - go run github.com/99designs/gqlgen --verbose
+
+
+  sql:
+    dir: deployments\database
+    cmds:
+      - migrate create -ext sql {{.name}}
+
+  migrate:
+    dir: deployments\database
+    cmds:
+      - migrate -source file://{{.db}}/. -database "mysql://root:root@tcp(localhost:3306)/{{.db}}" up
+
+
+  

@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package proto;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+
+service EventService {
+    rpc GetEvents (GetEventsRequest) returns (GetEventsResponse);
+    rpc UpdatePublishStatus (UpdatePublishStatusRequest) returns (google.protobuf.Empty);
+}
+
+message Event {
+    int64 id = 1;
+    string title = 2;
+    string description = 3;
+    PublishedStatus published_status = 4;
+    google.protobuf.Timestamp created_at = 5;
+    google.protobuf.Timestamp updated_at = 6;
+}
+
+enum PublishedStatus {
+    PublishedStatus_UNSPECIFIED = 0;
+    PublishedStatus_Draft = 1;
+    PublishedStatus_Published = 2;
+}
+
+message GetEventsRequest {
+    int64 id = 1;
+    string title = 2;
+    PublishedStatus published_status = 4;
+    google.protobuf.Timestamp created_at = 5;
+
+}
+
+message GetEventsResponse {
+    repeated Event Events = 1;
+}
+
+message UpdatePublishStatusRequest{
+    int64 event_id = 1;
+    string trans_id = 2;
+    PublishedStatus published_status = 3;
+}
+
+
+
+

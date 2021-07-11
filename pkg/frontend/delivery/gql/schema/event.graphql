@@ -1,0 +1,22 @@
+input PublishEventInput {
+    eventID: Int!
+}
+
+enum PublishedStatus {
+  DRAFT
+  PUBLISHED
+}
+
+type Event {
+    id: Int!
+    title: String!
+    description: String!
+    publishedStatus: PublishedStatus!
+    createdAt: Time!
+    updatedAt: Time!
+}
+
+input GetEventOptionsInput {
+  id: Int!
+  title: String!
+}
