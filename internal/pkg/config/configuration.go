@@ -19,24 +19,24 @@ import (
 )
 
 var (
-	// EnvPrefix 是 GAM 環境變數的前墬
+	// EnvPrefix 是環境變數的前墬
 	EnvPrefix string
 )
 
 // LogSetting 用來設定 log 相關資訊
 type LogSetting struct {
-	Name             string `yaml:"name"`
-	Type             string `yaml:"type"`
-	MinLevel         string `yaml:"min_level"`
-	ConnectionString string `yaml:"connection_string"`
+	Name             string
+	Type             string
+	MinLevel         string `mapstructure:"min_level"`
+	ConnectionString string `mapstructure:"connection_string"`
 }
 
 // Database 用來提供連線的資料庫數據
 type Database struct {
 	Name             string
-	ConnectionString string `yaml:"connection_string"`
+	ConnectionString string `mapstructure:"connection_string"`
 	Type             string
-	IsMigrated       bool `yaml:"is_migrated"`
+	IsMigrated       bool `mapstructure:"is_migrated"`
 }
 
 // Configuration 用來代表 config 設定物件
@@ -51,27 +51,27 @@ type Configuration struct {
 		Address string
 	}
 	Redis struct {
-		ClusterMode     bool     `yaml:"cluster_mode"`
-		Addresses       []string `yaml:"addresses"`
-		Password        string   `yaml:"password"`
-		MaxRetries      int      `yaml:"max_retries"`
-		PoolSizePerNode int      `yaml:"pool_size_per_node"`
-		DB              int      `yaml:"db"`
+		ClusterMode     bool `mapstructure:"cluster_mode"`
+		Addresses       []string
+		Password        string
+		MaxRetries      int `mapstructure:"max_retries"`
+		PoolSizePerNode int `mapstructure:"pool_size_per_node"`
+		DB              int
 	}
 	Jaeger struct {
-		AdvertiseAddr string `yaml:"advertise_addr"`
+		AdvertiseAddr string `mapstructure:"advertise_addr"`
 	}
 	Frontend struct {
-		HTTPBind          string `yaml:"http_bind"`
-		HTTPAdvertiseAddr string `yaml:"http_advertise_addr"`
+		HTTPBind          string `mapstructure:"http_bind"`
+		HTTPAdvertiseAddr string `mapstructure:"http_advertise_addr"`
 	}
 	Event struct {
-		GRPCBind          string `yaml:"grpc_bind"`
-		GRPCAdvertiseAddr string `yaml:"grpc_advertise_addr"`
+		GRPCBind          string `mapstructure:"grpc_bind"`
+		GRPCAdvertiseAddr string `mapstructure:"grpc_advertise_addr"`
 	}
 	Wallet struct {
-		GRPCBind          string `yaml:"grpc_bind"`
-		GRPCAdvertiseAddr string `yaml:"grpc_advertise_addr"`
+		GRPCBind          string `mapstructure:"grpc_bind"`
+		GRPCAdvertiseAddr string `mapstructure:"grpc_advertise_addr"`
 	}
 }
 

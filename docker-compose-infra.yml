@@ -8,7 +8,8 @@ services:
     environment:
       - "MYSQL_ROOT_PASSWORD=root"
     volumes:
-        - $LOCAL_WORKSPACE_FOLDER/mysql:/var/lib/mysql
+      - $LOCAL_WORKSPACE_FOLDER/deployments/database/starter_db/initial:/docker-entrypoint-initdb.d
+      - $LOCAL_WORKSPACE_FOLDER/mysql:/var/lib/mysql
     networks:
       - starter_net
 

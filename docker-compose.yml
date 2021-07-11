@@ -37,7 +37,7 @@ services:
         - event
         - wallet
     ports:
-      - "10080:10080"
+      - "10081:10081"
     volumes:
       - "$LOCAL_WORKSPACE_FOLDER/config/app.yml:/app/config/app.yml"
     command: /app/starter frontend

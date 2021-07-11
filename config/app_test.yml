@@ -22,8 +22,8 @@ logs:
     type: console
     min_level: debug
 frontend:
-  http_bind: ":10080"
-  http_advertise_addr: "localhost:10080"
+  http_bind: ":10081"
+  http_advertise_addr: "localhost:10081"
 event:
   grpc_bind: "localhost:10010"
   grpc_advertise_addr: "localhost:10010"

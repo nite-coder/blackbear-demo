@@ -58,10 +58,10 @@ var RunCmd = &cobra.Command{
 		}(ctx)
 
 		// start http server
-		nap := gql.NewHTTPServer(_eventClient, _walletClient, _temporalClient)
+		webServ := gql.NewHTTPServer(_eventClient, _walletClient, _temporalClient)
 		httpServer := &http.Server{
 			Addr:    cfg.Frontend.HTTPBind,
-			Handler: nap,
+			Handler: webServ,
 		}
 
 		go func() {

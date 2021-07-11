@@ -20,9 +20,12 @@ import (
 
 func InitDatabase(cfg config.Configuration, name string) (*gorm.DB, error) {
 	bo := backoff.NewExponentialBackOff()
-	bo.MaxElapsedTime = time.Duration(180) * time.Second
+	bo.MaxElapsedTime = time.Duration(30) * time.Second
 
 	for _, database := range cfg.Databases {
+
+		log.Str("connection_string", database.ConnectionString).Debug("database is initialing.")
+
 		if strings.EqualFold(database.Name, name) {
 
 			// migrate database if needed
@@ -90,7 +93,7 @@ func InitDatabase(cfg config.Configuration, name string) (*gorm.DB, error) {
 			}, bo)
 
 			if err != nil {
-				return nil, fmt.Errorf("database: database connect failed.  name: %s, error: %w", name, err)
+				return nil, fmt.Errorf("database: database connect failed.  connection_string: %s, error: %w", database.ConnectionString, err)
 			}
 
 			return db, nil
