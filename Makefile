@@ -6,8 +6,10 @@ test:
 build:
 	- docker build --rm --file=./build/docker/starter.dockerfile --tag jasonsoft/starter:latest .
 
-run: build
+run:
 	- docker-compose up --scale worker=1
+
+build-run: build run
 
 lint:
 	golangci-lint run ./... -v

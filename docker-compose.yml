@@ -7,7 +7,7 @@ services:
       - event
       - wallet
     volumes:
-      - "${PWD}/config/app_local.yml:/app/config/app.yml"
+      - "$LOCAL_WORKSPACE_FOLDER/config/app.yml:/app/config/app.yml"
     command: /app/starter worker
     networks:
       - starter_net
@@ -16,7 +16,7 @@ services:
   wallet:
     image: jasonsoft/starter:latest
     volumes:
-      - "${PWD}/config:/app/config"
+      - $LOCAL_WORKSPACE_FOLDER/config/app.yml:/app/config/app.yml
     command: /app/starter wallet
     networks:
       - starter_net
@@ -25,7 +25,7 @@ services:
   event:
     image: jasonsoft/starter:latest
     volumes:
-      - "./config/app_local.yml:/app/config/app.yml"
+      - "$LOCAL_WORKSPACE_FOLDER/config/app.yml:/app/config/app.yml"
     command: /app/starter event
     networks:
       - starter_net
@@ -39,7 +39,7 @@ services:
     ports:
       - "10080:10080"
     volumes:
-      - "./config/app_local.yml:/app/config/app.yml"
+      - "$LOCAL_WORKSPACE_FOLDER/config/app.yml:/app/config/app.yml"
     command: /app/starter frontend
     networks:
       - starter_net

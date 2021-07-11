@@ -8,13 +8,13 @@ services:
     environment:
       - "MYSQL_ROOT_PASSWORD=root"
     volumes:
-        - ./mysql:/var/lib/mysql
+        - $LOCAL_WORKSPACE_FOLDER/mysql:/var/lib/mysql
     networks:
       - starter_net
 
   # temporal
   temporal:
-    image: temporalio/auto-setup:1.4.1
+    image: temporalio/auto-setup:1.10.5
     ports:
      - "7233:7233"
     environment:
@@ -31,7 +31,7 @@ services:
 
   # temporal-admin-tools
   temporal-admin-tools:
-    image: temporalio/admin-tools:1.4.1
+    image: temporalio/admin-tools:1.10.5
     stdin_open: true
     tty: true
     environment:
@@ -43,7 +43,7 @@ services:
 
   # temporal-web
   temporal-web:
-    image: temporalio/web:1.4.1
+    image: temporalio/web:1.10.0
     environment:
       - "TEMPORAL_GRPC_ENDPOINT=temporal:7233"
       - "TEMPORAL_PERMIT_WRITE_API=true"
@@ -56,7 +56,7 @@ services:
 
   # Jaeger
   jaeger-all-in-one:
-    image: jaegertracing/all-in-one:1.21
+    image: jaegertracing/all-in-one:1.24
     ports:
       - "16686:16686"
       - "14268:14268"
