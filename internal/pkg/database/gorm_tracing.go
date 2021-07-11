@@ -1,9 +1,9 @@
 package database
 
 import (
-	internalMiddleware "github.com/jasonsoft/starter/internal/pkg/middleware"
+	internalMiddleware "github.com/nite-coder/blackbear-demo/internal/pkg/middleware"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/label"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 )
@@ -18,9 +18,9 @@ func before(db *gorm.DB) {
 	tr := otel.Tracer("")
 	ctx, span := tr.Start(db.Statement.Context, "gorm")
 
-	lblRequestID := label.KeyValue{
-		Key:   label.Key("request_id"),
-		Value: label.StringValue(internalMiddleware.RequestIDFromContext(ctx)),
+	lblRequestID := attribute.KeyValue{
+		Key:   attribute.Key("request_id"),
+		Value: attribute.StringValue(internalMiddleware.RequestIDFromContext(ctx)),
 	}
 
 	span.SetAttributes(lblRequestID)
@@ -44,19 +44,20 @@ func after(db *gorm.DB) {
 
 	// Error
 	if db.Error != nil {
-		lblError := label.KeyValue{
-			Key:   label.Key("error"),
-			Value: label.StringValue(db.Error.Error()),
+		lblError := attribute.KeyValue{
+			Key:   attribute.Key("error"),
+			Value: attribute.StringValue(db.Error.Error()),
 		}
+
 		evt := trace.WithAttributes(lblError)
 		span.AddEvent("error", evt)
 
 	}
 
 	// sql
-	lblSQL := label.KeyValue{
-		Key:   label.Key("sql"),
-		Value: label.StringValue(db.Dialector.Explain(db.Statement.SQL.String(), db.Statement.Vars...)),
+	lblSQL := attribute.KeyValue{
+		Key:   attribute.Key("sql"),
+		Value: attribute.StringValue(db.Dialector.Explain(db.Statement.SQL.String(), db.Statement.Vars...)),
 	}
 	span.SetAttributes(lblSQL)
 

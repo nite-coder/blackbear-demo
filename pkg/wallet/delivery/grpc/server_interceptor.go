@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/jasonsoft/log/v2"
-	internalMiddleware "github.com/jasonsoft/starter/internal/pkg/middleware"
-	"github.com/jasonsoft/starter/pkg/domain"
+	internalMiddleware "github.com/nite-coder/blackbear-demo/internal/pkg/middleware"
+	"github.com/nite-coder/blackbear-demo/pkg/domain"
+	"github.com/nite-coder/blackbear/pkg/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"

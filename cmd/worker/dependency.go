@@ -1,13 +1,13 @@
 package worker
 
 import (
-	"github.com/jasonsoft/log/v2"
-	"github.com/jasonsoft/starter/internal/pkg/config"
-	eventGRPC "github.com/jasonsoft/starter/pkg/event/delivery/grpc"
-	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
-	walletGRPC "github.com/jasonsoft/starter/pkg/wallet/delivery/grpc"
-	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
-	"github.com/jasonsoft/starter/pkg/workflow"
+	"github.com/nite-coder/blackbear-demo/internal/pkg/config"
+	eventGRPC "github.com/nite-coder/blackbear-demo/pkg/event/delivery/grpc"
+	eventProto "github.com/nite-coder/blackbear-demo/pkg/event/proto"
+	walletGRPC "github.com/nite-coder/blackbear-demo/pkg/wallet/delivery/grpc"
+	walletProto "github.com/nite-coder/blackbear-demo/pkg/wallet/proto"
+	"github.com/nite-coder/blackbear-demo/pkg/workflow"
+	"github.com/nite-coder/blackbear/pkg/log"
 )
 
 var (

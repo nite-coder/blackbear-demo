@@ -1,12 +1,12 @@
 package wallet
 
 import (
-	"github.com/jasonsoft/log/v2"
-	"github.com/jasonsoft/starter/internal/pkg/config"
-	"github.com/jasonsoft/starter/pkg/domain"
-	walletGRPC "github.com/jasonsoft/starter/pkg/wallet/delivery/grpc"
-	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
-	walletUsecase "github.com/jasonsoft/starter/pkg/wallet/usecase"
+	"github.com/nite-coder/blackbear-demo/internal/pkg/config"
+	"github.com/nite-coder/blackbear-demo/pkg/domain"
+	walletGRPC "github.com/nite-coder/blackbear-demo/pkg/wallet/delivery/grpc"
+	walletProto "github.com/nite-coder/blackbear-demo/pkg/wallet/proto"
+	walletUsecase "github.com/nite-coder/blackbear-demo/pkg/wallet/usecase"
+	"github.com/nite-coder/blackbear/pkg/log"
 )
 
 var (

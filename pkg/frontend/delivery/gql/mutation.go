@@ -3,9 +3,9 @@ package gql
 import (
 	"context"
 
-	"github.com/jasonsoft/log/v2"
-	internalMiddleware "github.com/jasonsoft/starter/internal/pkg/middleware"
-	starterWorkflow "github.com/jasonsoft/starter/pkg/workflow"
+	internalMiddleware "github.com/nite-coder/blackbear-demo/internal/pkg/middleware"
+	starterWorkflow "github.com/nite-coder/blackbear-demo/pkg/workflow"
+	"github.com/nite-coder/blackbear/pkg/log"
 	"go.opentelemetry.io/otel"
 	"go.temporal.io/sdk/client"
 )

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/jasonsoft/log/v2"
+	"github.com/nite-coder/blackbear/pkg/log"
 	"go.temporal.io/sdk/workflow"
 )
 

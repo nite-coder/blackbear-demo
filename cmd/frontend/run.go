@@ -9,9 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jasonsoft/log/v2"
-	"github.com/jasonsoft/starter/internal/pkg/config"
-	"github.com/jasonsoft/starter/pkg/frontend/delivery/gql"
+	"github.com/nite-coder/blackbear-demo/internal/pkg/config"
+	"github.com/nite-coder/blackbear-demo/pkg/frontend/delivery/gql"
+	"github.com/nite-coder/blackbear/pkg/log"
 	"github.com/spf13/cobra"
 )
 
@@ -43,8 +43,19 @@ var RunCmd = &cobra.Command{
 		}
 
 		// enable tracer
-		fn := cfg.InitTracer("frontend")
-		defer fn()
+		tp, err := cfg.TracerProvider("frontend")
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		// Cleanly shutdown and flush telemetry when the application exits.
+		defer func(ctx context.Context) {
+			// Do not make the application hang when it is shutdown.
+			ctx, cancel = context.WithTimeout(ctx, time.Second*5)
+			defer cancel()
+			if err := tp.Shutdown(ctx); err != nil {
+				log.Err(err).Panic("tp shutdown failed")
+			}
+		}(ctx)
 
 		// start http server
 		nap := gql.NewHTTPServer(_eventClient, _walletClient, _temporalClient)
@@ -67,7 +78,7 @@ var RunCmd = &cobra.Command{
 		<-stopChan
 		log.Info("main: shutting down server...")
 
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		ctx, cancel = context.WithTimeout(ctx, 10*time.Second)
 		defer cancel()
 		if err := httpServer.Shutdown(ctx); err != nil {
 			log.Errorf("main: http server shutdown error: %v", err)

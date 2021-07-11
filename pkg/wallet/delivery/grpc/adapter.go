@@ -2,8 +2,8 @@ package grpc
 
 import (
 	"github.com/golang/protobuf/ptypes"
-	"github.com/jasonsoft/starter/pkg/domain"
-	"github.com/jasonsoft/starter/pkg/wallet/proto"
+	"github.com/nite-coder/blackbear-demo/pkg/domain"
+	"github.com/nite-coder/blackbear-demo/pkg/wallet/proto"
 )
 
 func walletToGRPC(wallet *domain.Wallet) (*proto.Wallet, error) {

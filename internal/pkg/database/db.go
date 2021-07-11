@@ -11,8 +11,8 @@ import (
 
 	"github.com/cenkalti/backoff"
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/jasonsoft/log/v2"
-	"github.com/jasonsoft/starter/internal/pkg/config"
+	"github.com/nite-coder/blackbear-demo/internal/pkg/config"
+	"github.com/nite-coder/blackbear/pkg/log"
 	gormMySQL "gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"

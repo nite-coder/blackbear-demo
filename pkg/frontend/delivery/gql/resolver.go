@@ -3,8 +3,8 @@ package gql
 // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
 import (
-	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
-	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
+	eventProto "github.com/nite-coder/blackbear-demo/pkg/event/proto"
+	walletProto "github.com/nite-coder/blackbear-demo/pkg/wallet/proto"
 	temporalClient "go.temporal.io/sdk/client"
 )
 

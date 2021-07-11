@@ -3,7 +3,7 @@ package workflow
 import (
 	"context"
 
-	internalMiddleware "github.com/jasonsoft/starter/internal/pkg/middleware"
+	internalMiddleware "github.com/nite-coder/blackbear-demo/internal/pkg/middleware"
 	commonpb "go.temporal.io/api/common/v1"
 	"go.temporal.io/sdk/converter"
 	"go.temporal.io/sdk/workflow"

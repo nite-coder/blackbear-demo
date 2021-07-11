@@ -2,8 +2,8 @@ package grpc
 
 import (
 	"github.com/golang/protobuf/ptypes"
-	"github.com/jasonsoft/starter/pkg/domain"
-	"github.com/jasonsoft/starter/pkg/event/proto"
+	"github.com/nite-coder/blackbear-demo/pkg/domain"
+	"github.com/nite-coder/blackbear-demo/pkg/event/proto"
 )
 
 func eventToGRPC(event *domain.Event) (*proto.Event, error) {

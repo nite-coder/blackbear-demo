@@ -3,8 +3,8 @@ package gql
 import (
 	"context"
 
-	"github.com/jasonsoft/log/v2"
-	"github.com/jasonsoft/starter/pkg/event/proto"
+	"github.com/nite-coder/blackbear-demo/pkg/event/proto"
+	"github.com/nite-coder/blackbear/pkg/log"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 

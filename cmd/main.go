@@ -6,10 +6,10 @@ import (
 
 	_ "github.com/golang-migrate/migrate/v4/database/mysql"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"github.com/jasonsoft/starter/cmd/event"
-	"github.com/jasonsoft/starter/cmd/frontend"
-	"github.com/jasonsoft/starter/cmd/wallet"
-	"github.com/jasonsoft/starter/cmd/worker"
+	"github.com/nite-coder/blackbear-demo/cmd/event"
+	"github.com/nite-coder/blackbear-demo/cmd/frontend"
+	"github.com/nite-coder/blackbear-demo/cmd/wallet"
+	"github.com/nite-coder/blackbear-demo/cmd/worker"
 	"github.com/spf13/cobra"
 )
 

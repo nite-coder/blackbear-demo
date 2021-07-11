@@ -1,6 +1,7 @@
 package event
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"os"
@@ -8,10 +9,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jasonsoft/log/v2"
-	"github.com/jasonsoft/starter/internal/pkg/config"
-	eventGRPC "github.com/jasonsoft/starter/pkg/event/delivery/grpc"
-	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
+	"github.com/nite-coder/blackbear-demo/internal/pkg/config"
+	eventGRPC "github.com/nite-coder/blackbear-demo/pkg/event/delivery/grpc"
+	eventProto "github.com/nite-coder/blackbear-demo/pkg/event/proto"
+	"github.com/nite-coder/blackbear/pkg/log"
 	"github.com/spf13/cobra"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 
@@ -51,8 +52,19 @@ var RunCmd = &cobra.Command{
 		}
 
 		// enable tracer
-		fn := cfg.InitTracer("event")
-		defer fn()
+		tp, err := cfg.TracerProvider("event")
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		// Cleanly shutdown and flush telemetry when the application exits.
+		defer func(ctx context.Context) {
+			// Do not make the application hang when it is shutdown.
+			ctx, cancel = context.WithTimeout(ctx, time.Second*5)
+			defer cancel()
+			if err := tp.Shutdown(ctx); err != nil {
+				log.Err(err).Panic("tp shutdown failed")
+			}
+		}(ctx)
 
 		// start grpc servers
 		lis, err := net.Listen("tcp", cfg.Event.GRPCBind)

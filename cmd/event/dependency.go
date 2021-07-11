@@ -1,14 +1,14 @@
 package event
 
 import (
-	"github.com/jasonsoft/log/v2"
-	"github.com/jasonsoft/starter/internal/pkg/config"
-	"github.com/jasonsoft/starter/internal/pkg/database"
-	"github.com/jasonsoft/starter/pkg/domain"
-	eventGRPC "github.com/jasonsoft/starter/pkg/event/delivery/grpc"
-	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
-	eventDatabase "github.com/jasonsoft/starter/pkg/event/repository/mysql"
-	eventUsecase "github.com/jasonsoft/starter/pkg/event/usecase"
+	"github.com/nite-coder/blackbear-demo/internal/pkg/config"
+	"github.com/nite-coder/blackbear-demo/internal/pkg/database"
+	"github.com/nite-coder/blackbear-demo/pkg/domain"
+	eventGRPC "github.com/nite-coder/blackbear-demo/pkg/event/delivery/grpc"
+	eventProto "github.com/nite-coder/blackbear-demo/pkg/event/proto"
+	eventDatabase "github.com/nite-coder/blackbear-demo/pkg/event/repository/mysql"
+	eventUsecase "github.com/nite-coder/blackbear-demo/pkg/event/usecase"
+	"github.com/nite-coder/blackbear/pkg/log"
 )
 
 var (

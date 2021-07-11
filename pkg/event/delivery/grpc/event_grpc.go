@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/jasonsoft/log/v2"
-	"github.com/jasonsoft/starter/internal/pkg/config"
-	"github.com/jasonsoft/starter/pkg/domain"
-	"github.com/jasonsoft/starter/pkg/event/proto"
+	"github.com/nite-coder/blackbear-demo/internal/pkg/config"
+	"github.com/nite-coder/blackbear-demo/pkg/domain"
+	"github.com/nite-coder/blackbear-demo/pkg/event/proto"
+	"github.com/nite-coder/blackbear/pkg/log"
 )
 
 type eventServer struct {

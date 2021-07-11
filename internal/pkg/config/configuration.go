@@ -1,20 +1,21 @@
 package config
 
 import (
-	"io/ioutil"
 	stdlog "log"
-	"os"
 	"path/filepath"
 
-	"github.com/jasonsoft/log/v2"
-	"github.com/jasonsoft/log/v2/handlers/console"
-	"github.com/jasonsoft/log/v2/handlers/gelf"
+	bearConfig "github.com/nite-coder/blackbear/pkg/config"
+	"github.com/nite-coder/blackbear/pkg/config/provider/env"
+	"github.com/nite-coder/blackbear/pkg/config/provider/file"
+	"github.com/nite-coder/blackbear/pkg/log"
+	"github.com/nite-coder/blackbear/pkg/log/handler/console"
+	"github.com/nite-coder/blackbear/pkg/log/handler/gelf"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/trace/jaeger"
-	"go.opentelemetry.io/otel/label"
+	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/propagation"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"gopkg.in/yaml.v2"
+	"go.opentelemetry.io/otel/sdk/resource"
+	tracesdk "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
 var (
@@ -78,30 +79,20 @@ type Configuration struct {
 func New(fileName string) Configuration {
 	cfg := Configuration{}
 
-	cfg.rootDirPath = os.Getenv("STARTER_HOME")
-	if cfg.rootDirPath == "" {
-		//read and parse config file
-		rootDirPathStr, err := filepath.Abs(filepath.Dir(os.Args[0]))
-		if err != nil {
-			stdlog.Fatalf("config: file error: %s", err.Error())
-		}
-		cfg.rootDirPath = rootDirPathStr
-	}
+	bearConfig.RemoveAllPrividers()
 
-	//configPath := filepath.Join(rootDirPath, "configs", fileName)
-	configPath := cfg.Path("configs", fileName)
-	_, err := os.Stat(configPath)
+	envProvider := env.New()
+	bearConfig.AddProvider(envProvider)
+
+	fileProvder := file.New()
+	err := fileProvder.Load()
 	if err != nil {
-		stdlog.Fatalf("config: file error: %s", err.Error())
+		panic(err)
 	}
 
-	// config exists
-	file, err := ioutil.ReadFile(filepath.Clean(configPath))
-	if err != nil {
-		stdlog.Fatalf("config: read file error: %s", err.Error())
-	}
+	bearConfig.AddProvider(fileProvder)
+	err = bearConfig.Scan("", &cfg)
 
-	err = yaml.Unmarshal(file, &cfg)
 	if err != nil {
 		stdlog.Fatal("config: yaml unmarshal error:", err)
 	}
@@ -134,24 +125,27 @@ func (cfg Configuration) InitLogger(appID string) {
 	}
 }
 
-// InitTracer creates a new trace provider instance and registers it as global trace provider.
-func (cfg Configuration) InitTracer(appID string) func() {
-	// Create and install Jaeger export pipeline
-	flush, err := jaeger.InstallNewPipeline(
-		jaeger.WithCollectorEndpoint(cfg.Jaeger.AdvertiseAddr),
-		jaeger.WithProcess(jaeger.Process{
-			ServiceName: appID,
-			Tags: []label.KeyValue{
-				label.String("version", "1.0"),
-			},
-		}),
-		jaeger.WithSDK(&sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
-	)
+// TracerProvider returns an OpenTelemetry TracerProvider configured to use
+// the Jaeger exporter that will send spans to the provided url. The returned
+// TracerProvider will also use a Resource configured with all the information
+// about the application.
+func (cfg Configuration) TracerProvider(appID string) (*tracesdk.TracerProvider, error) {
+	// Create the Jaeger exporter
+	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(cfg.Jaeger.AdvertiseAddr)))
 	if err != nil {
-		log.Err(err).Fatal("install jaeger pipleline failed.")
+		return nil, err
 	}
+	tp := tracesdk.NewTracerProvider(
+		// Always be sure to batch in production.
+		tracesdk.WithBatcher(exp),
+		// Record information about this application in an Resource.
+		tracesdk.WithResource(resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceNameKey.String(appID),
+		)),
+	)
+
+	otel.SetTracerProvider(tp)
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
-	return func() {
-		flush()
-	}
+	return tp, nil
 }

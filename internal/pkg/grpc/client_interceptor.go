@@ -3,8 +3,8 @@ package gql
 import (
 	"context"
 
-	"github.com/jasonsoft/log/v2"
-	internalMiddleware "github.com/jasonsoft/starter/internal/pkg/middleware"
+	internalMiddleware "github.com/nite-coder/blackbear-demo/internal/pkg/middleware"
+	"github.com/nite-coder/blackbear/pkg/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )

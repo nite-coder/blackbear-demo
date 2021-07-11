@@ -1,6 +1,7 @@
 package wallet
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"os"
@@ -8,10 +9,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jasonsoft/log/v2"
-	"github.com/jasonsoft/starter/internal/pkg/config"
-	walletGRPC "github.com/jasonsoft/starter/pkg/wallet/delivery/grpc"
-	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
+	"github.com/nite-coder/blackbear-demo/internal/pkg/config"
+	walletGRPC "github.com/nite-coder/blackbear-demo/pkg/wallet/delivery/grpc"
+	walletProto "github.com/nite-coder/blackbear-demo/pkg/wallet/proto"
+	"github.com/nite-coder/blackbear/pkg/log"
 	"github.com/spf13/cobra"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
@@ -50,8 +51,19 @@ var RunCmd = &cobra.Command{
 		}
 
 		// enable tracer
-		fn := cfg.InitTracer("wallet")
-		defer fn()
+		tp, err := cfg.TracerProvider("wallet")
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		// Cleanly shutdown and flush telemetry when the application exits.
+		defer func(ctx context.Context) {
+			// Do not make the application hang when it is shutdown.
+			ctx, cancel = context.WithTimeout(ctx, time.Second*5)
+			defer cancel()
+			if err := tp.Shutdown(ctx); err != nil {
+				log.Err(err).Panic("tp shutdown failed")
+			}
+		}(ctx)
 
 		// start grpc servers
 		lis, err := net.Listen("tcp", cfg.Wallet.GRPCBind)

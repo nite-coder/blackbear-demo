@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/jasonsoft/starter/internal/pkg/config"
-	"github.com/jasonsoft/starter/pkg/domain"
+	"github.com/nite-coder/blackbear-demo/internal/pkg/config"
+	"github.com/nite-coder/blackbear-demo/pkg/domain"
 	"gorm.io/gorm"
 )
 

@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	"github.com/99designs/gqlgen/handler"
-	"github.com/jasonsoft/log/v2"
-	"github.com/jasonsoft/starter/pkg/domain"
+	"github.com/nite-coder/blackbear-demo/pkg/domain"
+	"github.com/nite-coder/blackbear/pkg/log"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"go.temporal.io/sdk/temporal"
 )

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package common;
 
-option go_package = "github.com/jasonsoft/starter/internal/pkg/common";
+option go_package = "github.com/nite-coder/blackbear-demo/internal/pkg/common";
 
 
 message EmptyRequest{}

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jasonsoft/napnap"
+	"github.com/nite-coder/blackbear/pkg/web"
 )
 
 type requestIDKey string
@@ -28,7 +28,7 @@ func NewRequestIDMW() *RequestIDMW {
 }
 
 // Invoke function is a middleware entry
-func (m *RequestIDMW) Invoke(c *napnap.Context, next napnap.HandlerFunc) {
+func (m *RequestIDMW) Invoke(c *web.Context, next web.HandlerFunc) {
 	ctx := c.StdContext()
 
 	requestID := c.RequestHeader(key.String())

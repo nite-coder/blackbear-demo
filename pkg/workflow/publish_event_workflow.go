@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
-	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
+	eventProto "github.com/nite-coder/blackbear-demo/pkg/event/proto"
+	walletProto "github.com/nite-coder/blackbear-demo/pkg/wallet/proto"
 
 	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"

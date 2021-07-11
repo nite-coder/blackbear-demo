@@ -1,12 +1,11 @@
 package grpc
 
 import (
-	"github.com/jasonsoft/log/v2"
-	"github.com/jasonsoft/starter/internal/pkg/config"
-	internalGRPC "github.com/jasonsoft/starter/internal/pkg/grpc"
-	"github.com/jasonsoft/starter/pkg/event/proto"
+	"github.com/nite-coder/blackbear-demo/internal/pkg/config"
+	internalGRPC "github.com/nite-coder/blackbear-demo/internal/pkg/grpc"
+	"github.com/nite-coder/blackbear-demo/pkg/event/proto"
+	"github.com/nite-coder/blackbear/pkg/log"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 )

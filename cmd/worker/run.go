@@ -3,10 +3,11 @@ package worker
 import (
 	"context"
 	"fmt"
+	"time"
 
-	"github.com/jasonsoft/log/v2"
-	"github.com/jasonsoft/starter/internal/pkg/config"
-	starterWorkflow "github.com/jasonsoft/starter/pkg/workflow"
+	"github.com/nite-coder/blackbear-demo/internal/pkg/config"
+	starterWorkflow "github.com/nite-coder/blackbear-demo/pkg/workflow"
+	"github.com/nite-coder/blackbear/pkg/log"
 	"github.com/spf13/cobra"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/bridge/opentracing"
@@ -42,8 +43,19 @@ var RunCmd = &cobra.Command{
 		}
 
 		// enable tracer
-		fn := cfg.InitTracer("worker")
-		defer fn()
+		tp, err := cfg.TracerProvider("worker")
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		// Cleanly shutdown and flush telemetry when the application exits.
+		defer func(ctx context.Context) {
+			// Do not make the application hang when it is shutdown.
+			ctx, cancel = context.WithTimeout(ctx, time.Second*5)
+			defer cancel()
+			if err := tp.Shutdown(ctx); err != nil {
+				log.Err(err).Panic("tp shutdown failed")
+			}
+		}(ctx)
 
 		tr := otel.Tracer("")
 		bridgeTracer, _ := opentracing.NewTracerPair(tr)

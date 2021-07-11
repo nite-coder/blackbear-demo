@@ -3,11 +3,11 @@ package workflow
 import (
 	"context"
 
-	"github.com/jasonsoft/log/v2"
-	"github.com/jasonsoft/starter/internal/pkg/config"
-	internalMiddleware "github.com/jasonsoft/starter/internal/pkg/middleware"
-	eventProto "github.com/jasonsoft/starter/pkg/event/proto"
-	walletProto "github.com/jasonsoft/starter/pkg/wallet/proto"
+	"github.com/nite-coder/blackbear-demo/internal/pkg/config"
+	internalMiddleware "github.com/nite-coder/blackbear-demo/internal/pkg/middleware"
+	eventProto "github.com/nite-coder/blackbear-demo/pkg/event/proto"
+	walletProto "github.com/nite-coder/blackbear-demo/pkg/wallet/proto"
+	"github.com/nite-coder/blackbear/pkg/log"
 )
 
 var _manager *Manager
