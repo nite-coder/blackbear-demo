@@ -28,9 +28,13 @@ RUN apt-get update \
 
 RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.41.1
 
+RUN curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protoc-3.17.3-linux-x86_64.zip
+RUN unzip -o protoc-3.17.3-linux-x86_64.zip -d $HOME/.local
+RUN export PATH="$PATH:$HOME/.local/bin"
+
+
 # [Optional] Uncomment this section to install additional OS packages.
-RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-  && apt-get -y install --no-install-recommends protobuf-compiler
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive 
 
 # [Optional] Uncomment the next line to use go get to install anything else you need
 RUN go get -u github.com/golang/protobuf/protoc-gen-go
