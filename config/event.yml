@@ -1,0 +1,21 @@
+app:
+  id: event
+  env: local
+  mode: debug
+
+log:
+  - name: clog
+    type: console
+    min_level: debug
+
+server:
+  grpc:
+    - name: event
+
+data:
+  database:
+    - name: starter_db
+      type: mysql
+      connection_string: root:root@tcp(mysql:3306)/starter_db?charset=utf8&parseTime=true&multiStatements=true&timeout=60s
+      migration: true
+      health_check: true

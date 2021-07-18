@@ -38,11 +38,6 @@ var RunCmd = &cobra.Command{
 			}
 		}()
 
-		// fix gorm NowFunc
-		// gorm.NowFunc = func() time.Time {
-		// 	return time.Now().UTC()
-		// }
-
 		config.EnvPrefix = "STARTER"
 		cfg := config.New("app.yml")
 		err := initialize(cfg)
@@ -91,6 +86,7 @@ var RunCmd = &cobra.Command{
 			),
 			grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()),
 		)
+
 		eventProto.RegisterEventServiceServer(grpcServer, _eventServer)
 		log.Infof("event grpc service listen on %s", cfg.Event.GRPCBind)
 		go func() {

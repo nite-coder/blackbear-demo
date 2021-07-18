@@ -106,23 +106,26 @@ func (cfg Configuration) Path(path ...string) string {
 
 func (cfg Configuration) InitLogger(appID string) {
 	// set up log target
-	log.
+	logger := log.New()
+	logger = logger.
 		Str("app_id", appID).
 		Str("env", cfg.Env).
-		SaveToDefault()
+		Logger()
 
 	for _, target := range cfg.Logs {
 		switch target.Type {
 		case "console":
 			clog := console.New()
 			levels := log.GetLevelsFromMinLevel(target.MinLevel)
-			log.AddHandler(clog, levels...)
+			logger.AddHandler(clog, levels...)
 		case "gelf":
 			graylog := gelf.New(target.ConnectionString)
 			levels := log.GetLevelsFromMinLevel(target.MinLevel)
-			log.AddHandler(graylog, levels...)
+			logger.AddHandler(graylog, levels...)
 		}
 	}
+
+	log.SetLogger(logger)
 }
 
 // TracerProvider returns an OpenTelemetry TracerProvider configured to use

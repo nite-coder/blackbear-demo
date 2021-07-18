@@ -8,9 +8,9 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/golang-migrate/migrate/v4 v4.14.1
 	github.com/golang/protobuf v1.5.2
-	github.com/google/uuid v1.2.0
+	github.com/google/uuid v1.3.0
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
-	github.com/nite-coder/blackbear v0.0.0-20210710135651-97a27fc0a4df
+	github.com/nite-coder/blackbear v0.0.0-20210718123926-e90289be9b12
 	github.com/spf13/cobra v1.2.1
 	github.com/stretchr/testify v1.7.0
 	github.com/vektah/gqlparser/v2 v2.2.0
@@ -28,5 +28,5 @@ require (
 	google.golang.org/grpc v1.39.0
 	google.golang.org/protobuf v1.27.1
 	gorm.io/driver/mysql v1.1.1
-	gorm.io/gorm v1.21.11
+	gorm.io/gorm v1.21.12
 )

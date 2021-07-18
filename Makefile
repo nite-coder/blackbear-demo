@@ -11,10 +11,8 @@ run:
 
 build-run: build run
 
-lint:
-	golangci-lint run ./... -v
 
-lint.docker:
+lint:
 	docker run --rm -v ${LOCAL_WORKSPACE_FOLDER}:/app -w /app golangci/golangci-lint:v1.41-alpine golangci-lint run ./... -v
 
 infra:
