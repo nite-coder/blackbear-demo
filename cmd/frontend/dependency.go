@@ -12,7 +12,6 @@ import (
 
 	"go.opentelemetry.io/otel/bridge/opentracing"
 	"go.opentelemetry.io/otel/trace"
-	"go.temporal.io/sdk/client"
 	temporalClient "go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/workflow"
 )
@@ -55,7 +54,7 @@ func initTemporalClient(cfg config.Configuration) (temporalClient.Client, error)
 	// The client is a heavyweight object that should be created once per process.
 	bridgeTracer, _ := opentracing.NewTracerPair(_tracer)
 
-	c, err := temporalClient.NewClient(client.Options{
+	c, err := temporalClient.NewClient(temporalClient.Options{
 		HostPort: cfg.Temporal.Address,
 		ContextPropagators: []workflow.ContextPropagator{
 			starterWorkflow.NewContextPropagator(),

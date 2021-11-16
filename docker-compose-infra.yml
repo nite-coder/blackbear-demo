@@ -9,15 +9,13 @@ services:
       - "MYSQL_ROOT_PASSWORD=root"
     volumes:
       - $LOCAL_WORKSPACE_FOLDER/deployments/database/starter_db/initial:/docker-entrypoint-initdb.d
-      - $LOCAL_WORKSPACE_FOLDER/mysql:/var/lib/mysql
-    networks:
-      - starter_net
+      - $LOCAL_WORKSPACE_FOLDER/data/mysql:/var/lib/mysql
 
   # temporal
   temporal:
-    image: temporalio/auto-setup:1.10.5
+    image: temporalio/auto-setup:1.13.1
     ports:
-     - "7233:7233"
+      - "7233:7233"
     environment:
       - "AUTO_SETUP=true"
       - "DB=mysql"
@@ -27,24 +25,20 @@ services:
       - "DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml"
     depends_on:
       - mysql
-    networks:
-      - starter_net
 
   # temporal-admin-tools
   temporal-admin-tools:
-    image: temporalio/admin-tools:1.10.5
+    image: temporalio/admin-tools:1.13.1
     stdin_open: true
     tty: true
     environment:
       - "TEMPORAL_CLI_ADDRESS=temporal:7233"
     depends_on:
       - temporal
-    networks:
-      - starter_net
 
   # temporal-web
   temporal-web:
-    image: temporalio/web:1.10.0
+    image: temporalio/web:1.13.0
     environment:
       - "TEMPORAL_GRPC_ENDPOINT=temporal:7233"
       - "TEMPORAL_PERMIT_WRITE_API=true"
@@ -52,8 +46,6 @@ services:
       - "8088:8088"
     depends_on:
       - temporal
-    networks:
-      - starter_net
 
   # Jaeger
   jaeger-all-in-one:
@@ -62,10 +54,3 @@ services:
       - "16686:16686"
       - "14268:14268"
       - "14250"
-    networks:
-      - starter_net
-
-networks:
-  starter_net:
-    name: starter_network
-

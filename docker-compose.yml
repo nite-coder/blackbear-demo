@@ -9,8 +9,6 @@ services:
     volumes:
       - "${LOCAL_WORKSPACE_FOLDER}/config/app.yml:/app/config/app.yml"
     command: /app/starter worker
-    networks:
-      - starter_net
 
   # wallet
   wallet:
@@ -18,38 +16,25 @@ services:
     volumes:
       - ${LOCAL_WORKSPACE_FOLDER}/config/app.yml:/app/config/app.yml
     command: /app/starter wallet
-    networks:
-      - starter_net
-      
+
   # event
   event:
     image: jasonsoft/starter:latest
     volumes:
       - "${LOCAL_WORKSPACE_FOLDER}/config/app.yml:/app/config/app.yml"
     command: /app/starter event
-    networks:
-      - starter_net
 
   # frontend
   frontend:
     image: jasonsoft/starter:latest
     depends_on:
-        - event
-        - wallet
+      - event
+      - wallet
     ports:
       - "10081:10081"
     volumes:
       - "${LOCAL_WORKSPACE_FOLDER}/config/app.yml:/app/config/app.yml"
     command: /app/starter frontend
-    networks:
-      - starter_net
-
-networks:
-  starter_net:
-    external:
-      name: starter_network 
-
-      
   # event-dapr:
   #   image: "daprio/daprd:0.10.0"
   #   command: [

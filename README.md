@@ -2,7 +2,7 @@
 
 test
 
-http://localhost:10081
+http://localhost:10081/playground
 
 ```gql
 query listEvent{
@@ -17,7 +17,7 @@ query listEvent{
 }
 
 query getEvent{
-  getEvent(eventID: 2){
+  getEvent(eventID: 1){
     id
     title
     description
